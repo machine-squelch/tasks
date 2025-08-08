@@ -9,7 +9,7 @@ body {
     position: relative;
 }
 
-/* Animated background with enhanced glitchy scan lines - MORE VISIBLE */
+/* Animated background with enhanced glitchy scan lines */
 body::before {
     content: "";
     position: fixed;
@@ -20,7 +20,7 @@ body::before {
     background:
         repeating-linear-gradient(
             0deg,
-            rgba(0, 255, 0, 0.08) 0px,  /* MORE VISIBLE */
+            rgba(0, 255, 0, 0.08) 0px,
             transparent 1px,
             transparent 2px,
             rgba(0, 255, 0, 0.08) 3px
@@ -28,13 +28,61 @@ body::before {
         repeating-linear-gradient(
             90deg,
             transparent 0px,
-            rgba(0, 255, 0, 0.03) 50px,  /* MORE VISIBLE */
+            rgba(0, 255, 0, 0.03) 50px,
             transparent 100px
         );
     pointer-events: none;
     z-index: 1;
     animation: scanlines 8s linear infinite, glitch-shift 0.3s infinite;
 }
+
+/* New Scan Glitch Overlay */
+.scan-glitch-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.scan-glitch-overlay::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 4px;
+    background: radial-gradient(ellipse at center, rgba(0, 255, 100, 0.8) 0%, transparent 80%);
+    box-shadow: 0 0 15px 5px rgba(0, 255, 100, 0.5);
+    opacity: 0;
+    animation: scan-glitch 6s linear infinite;
+}
+
+@keyframes scan-glitch {
+    0% { transform: translateY(-10vh); opacity: 0; }
+    5% { transform: translateY(-10vh); opacity: 0; }
+    
+    /* Fast scan down */
+    10% { transform: translateY(110vh); opacity: 1; height: 2px; }
+    10.2% { opacity: 0; }
+    10.3% { transform: translateY(-10vh); opacity: 0; }
+
+    /* Slow flicker */
+    40% { transform: translateY(30vh); opacity: 0; }
+    40.1% { opacity: 0.7; height: 4px; }
+    40.3% { opacity: 0; }
+
+    /* Another flicker */
+    65% { transform: translateY(70vh); opacity: 0; }
+    65.1% { opacity: 0.5; height: 3px; }
+    65.4% { opacity: 0; }
+    
+    100% { transform: translateY(110vh); opacity: 0; }
+}
+
 
 @keyframes glitch-shift {
     0%, 98%, 100% { transform: translateX(0); }
@@ -67,22 +115,10 @@ body::after {
         opacity: 0;
         transform: translateY(0);
     }
-    96% {
-        opacity: 1;
-        transform: translateY(100vh);
-    }
-    97% {
-        opacity: 1;
-        transform: translateY(200vh);
-    }
-    98% {
-        opacity: 1;
-        transform: translateY(50vh);
-    }
-    99% {
-        opacity: 0;
-        transform: translateY(150vh);
-    }
+    96% { opacity: 1; transform: translateY(100vh); }
+    97% { opacity: 1; transform: translateY(200vh); }
+    98% { opacity: 1; transform: translateY(50vh); }
+    99% { opacity: 0; transform: translateY(150vh); }
 }
 
 .static-overlay::before {
@@ -92,11 +128,7 @@ body::after {
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg,
-        #ff0000 0%,
-        #00ff00 33%,
-        #0000ff 66%,
-        #ff0000 100%);
+    background: linear-gradient(90deg, #ff0000 0%, #00ff00 33%, #0000ff 66%, #ff0000 100%);
     opacity: 0;
     animation: rgb-glitch-line 5s infinite;
     filter: blur(1px);
@@ -111,52 +143,6 @@ body::after {
 @keyframes scanlines {
     0% { transform: translateY(0); }
     100% { transform: translateY(10px); }
-}
-
-.scan-glitch-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 9999;
-}
-
-.scan-glitch-overlay::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 4px;
-    background: radial-gradient(ellipse at center, rgba(0, 255, 100, 0.8) 0%, transparent 80%);
-    box-shadow: 0 0 15px 5px rgba(0, 255, 100, 0.5);
-    opacity: 0;
-    animation: scan-glitch 6s linear infinite;
-}
-
-@keyframes scan-glitch {
-    0% { transform: translateY(-10vh); opacity: 0; }
-    5% { transform: translateY(-10vh); opacity: 0; }
-
-    /* Fast scan down */
-    10% { transform: translateY(110vh); opacity: 1; height: 2px; }
-    10.2% { opacity: 0; }
-    10.3% { transform: translateY(-10vh); opacity: 0; }
-
-    /* Slow flicker */
-    40% { transform: translateY(30vh); opacity: 0; }
-    40.1% { opacity: 0.7; height: 4px; }
-    40.3% { opacity: 0; }
-
-    /* Another flicker */
-    65% { transform: translateY(70vh); opacity: 0; }
-    65.1% { opacity: 0.5; height: 3px; }
-    65.4% { opacity: 0; }
-
-    100% { transform: translateY(110vh); opacity: 0; }
 }
 
 /* CRT Monitor Effect for Logo */
@@ -191,10 +177,7 @@ body::after {
     position: relative;
     width: 100%;
     height: 100%;
-    background: radial-gradient(ellipse at center,
-        rgba(0, 40, 0, 1) 0%,
-        rgba(0, 20, 0, 1) 50%,
-        rgba(0, 10, 0, 1) 100%);
+    background: radial-gradient(ellipse at center, rgba(0, 40, 0, 1) 0%, rgba(0, 20, 0, 1) 50%, rgba(0, 10, 0, 1) 100%);
     border-radius: 10px;
     overflow: hidden;
     display: flex;
@@ -207,16 +190,9 @@ body::after {
 .crt-screen::before {
     content: "";
     position: absolute;
-    top: -20%;
-    left: -20%;
-    width: 140%;
-    height: 140%;
-    background: radial-gradient(
-        ellipse at center,
-        transparent 0%,
-        transparent 50%,
-        rgba(0, 0, 0, 0.4) 100%
-    );
+    top: -20%; left: -20%;
+    width: 140%; height: 140%;
+    background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
     pointer-events: none;
     z-index: 3;
 }
@@ -225,24 +201,11 @@ body::after {
 .crt-screen::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background:
-        repeating-linear-gradient(
-            0deg,
-            rgba(0, 255, 0, 0.03) 0px,
-            transparent 1px,
-            transparent 2px,
-            rgba(0, 255, 0, 0.03) 3px
-        ),
-        repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            rgba(0, 0, 0, 0.05) 1px,
-            transparent 2px
-        );
+        repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 0px, transparent 1px, transparent 2px, rgba(0, 255, 0, 0.03) 3px),
+        repeating-linear-gradient(90deg, transparent 0px, rgba(0, 0, 0, 0.05) 1px, transparent 2px);
     pointer-events: none;
     z-index: 2;
     animation: crt-scanlines 8s linear infinite;
@@ -270,30 +233,15 @@ body::after {
 }
 
 @keyframes crt-flicker {
-    0%, 100% {
-        opacity: 1;
-        filter: brightness(1) contrast(1);
-    }
-    92% {
-        opacity: 0.95;
-        filter: brightness(0.95) contrast(1.02);
-    }
-    94% {
-        opacity: 1;
-        filter: brightness(1.05) contrast(0.98);
-    }
+    0%, 100% { opacity: 1; filter: brightness(1) contrast(1); }
+    92% { opacity: 0.95; filter: brightness(0.95) contrast(1.02); }
+    94% { opacity: 1; filter: brightness(1.05) contrast(0.98); }
 }
 
 /* Logo inside CRT with restored glitch effects */
 .crt-logo {
-    width: 100px;
-    height: 100px;
-    filter:
-        hue-rotate(120deg)
-        saturate(1.5)
-        brightness(1.5)
-        drop-shadow(0 0 10px rgba(0, 255, 0, 0.8))
-        contrast(1.2);
+    width: 100px; height: 100px;
+    filter: hue-rotate(120deg) saturate(1.5) brightness(1.5) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8)) contrast(1.2);
     animation: crt-logo-pulse 3s infinite, logo-glitch-effect 3s infinite;
     position: relative;
     z-index: 1;
@@ -304,10 +252,8 @@ body::after {
 .crt-logo::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: url('dllogoonly.png') no-repeat center;
     background-size: 100px 100px;
     opacity: 0.8;
@@ -326,12 +272,7 @@ body::after {
 }
 
 .crt-logo:hover {
-    filter:
-        hue-rotate(180deg)
-        saturate(2.5)
-        brightness(2)
-        drop-shadow(0 0 20px rgba(0, 255, 255, 1))
-        contrast(1.5);
+    filter: hue-rotate(180deg) saturate(2.5) brightness(2) drop-shadow(0 0 20px rgba(0, 255, 255, 1)) contrast(1.5);
     animation: logo-glitch-burst 0.3s infinite;
 }
 
@@ -351,27 +292,15 @@ body::after {
 }
 
 @keyframes crt-logo-pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-@keyframes crt-distortion {
-    0%, 100% { transform: skew(0deg); }
-    94% { transform: skew(0deg); }
-    95% { transform: skew(0.5deg); }
-    96% { transform: skew(-0.5deg); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 /* CRT Monitor Frame Details */
 .crt-monitor::before {
     content: "DL-CRT v2.1 | PHOSPHOR-X | 60Hz";
     position: absolute;
-    bottom: -15px;
-    left: 50%;
+    bottom: -15px; left: 50%;
     transform: translateX(-50%);
     font-size: 8px;
     color: #444;
@@ -385,39 +314,25 @@ body::after {
 .crt-monitor::after {
     content: "";
     position: absolute;
-    bottom: -10px;
-    left: 50%;
+    bottom: -10px; left: 50%;
     transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     background: radial-gradient(circle, #00ff00 30%, transparent 70%);
     border-radius: 50%;
     animation: power-led 2s infinite;
-    box-shadow:
-        -20px 0 0 -2px #333,
-        20px 0 0 -2px #333,
-        -40px 0 0 -2px #333,
-        40px 0 0 -2px #333;
+    box-shadow: -20px 0 0 -2px #333, 20px 0 0 -2px #333, -40px 0 0 -2px #333, 40px 0 0 -2px #333;
 }
 
 @keyframes power-led {
-    0%, 100% {
-        background: radial-gradient(circle, #00ff00 30%, transparent 70%);
-        box-shadow: 0 0 5px #00ff00;
-    }
-    50% {
-        background: radial-gradient(circle, #00ff88 30%, transparent 70%);
-        box-shadow: 0 0 10px #00ff88;
-    }
+    0%, 100% { background: radial-gradient(circle, #00ff00 30%, transparent 70%); box-shadow: 0 0 5px #00ff00; }
+    50% { background: radial-gradient(circle, #00ff88 30%, transparent 70%); box-shadow: 0 0 10px #00ff88; }
 }
 
 /* Static noise overlay for CRT */
 .crt-static {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 4;
@@ -436,16 +351,10 @@ body::after {
 /* Phosphor burn-in effect */
 .crt-burn {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(
-        circle at center,
-        rgba(0, 255, 0, 0.05) 0%,
-        transparent 70%
-    );
+    width: 80px; height: 80px;
+    background: radial-gradient(circle at center, rgba(0, 255, 0, 0.05) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
     animation: burn-fade 20s infinite;
@@ -464,38 +373,15 @@ body::after {
 }
 
 @keyframes logo-glitch-effect {
-    0%, 100% {
-        filter: hue-rotate(120deg) saturate(1.5) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
-    }
-    20% {
-        filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
-    }
-    40% {
-        filter: hue-rotate(100deg) saturate(1.8) brightness(1.1) drop-shadow(0 0 25px rgba(255, 0, 255, 0.6));
-    }
-    60% {
-        filter: hue-rotate(160deg) saturate(1.3) brightness(1.3) drop-shadow(0 0 35px rgba(0, 255, 0, 0.9));
-    }
-    80% {
-        filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7));
-    }
-    /* Random corruption glitches */
-    23% {
-        filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)) invert(1);
-        transform: skewX(20deg);
-    }
-    23.5% {
-        filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
-        transform: skewX(0deg);
-    }
-    77% {
-        filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7)) contrast(3);
-        transform: scaleX(1.3) scaleY(0.8);
-    }
-    77.5% {
-        filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7));
-        transform: scaleX(1) scaleY(1);
-    }
+    0%, 100% { filter: hue-rotate(120deg) saturate(1.5) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 0, 0.5)); }
+    20% { filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)); }
+    40% { filter: hue-rotate(100deg) saturate(1.8) brightness(1.1) drop-shadow(0 0 25px rgba(255, 0, 255, 0.6)); }
+    60% { filter: hue-rotate(160deg) saturate(1.3) brightness(1.3) drop-shadow(0 0 35px rgba(0, 255, 0, 0.9)); }
+    80% { filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7)); }
+    23% { filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)) invert(1); transform: skewX(20deg); }
+    23.5% { filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)); transform: skewX(0deg); }
+    77% { filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7)) contrast(3); transform: scaleX(1.3) scaleY(0.8); }
+    77.5% { filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7)); transform: scaleX(1) scaleY(1); }
 }
 
 /* Glitch effect for headers */
@@ -504,10 +390,7 @@ body::after {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
     text-transform: uppercase;
-    text-shadow:
-        0.05em 0 0 rgba(255, 0, 0, .75),
-        -0.025em -0.05em 0 rgba(0, 255, 0, .75),
-        0.025em 0.05em 0 rgba(0, 100, 255, .75);
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75), -0.025em -0.05em 0 rgba(0, 255, 0, .75), 0.025em 0.05em 0 rgba(0, 100, 255, .75);
     animation: glitch 2s infinite;
 }
 
@@ -515,10 +398,8 @@ body::after {
 .glitch::after {
     content: attr(data-text);
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
 }
 
 .glitch::before {
@@ -571,10 +452,7 @@ body::after {
 .neon-border::before {
     content: "";
     position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
     background: linear-gradient(45deg, #00ff00, #00ffff, #ff00ff, #ffff00);
     border-radius: inherit;
     z-index: -1;
@@ -602,10 +480,8 @@ body::after {
 .task-card::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
     transition: left 0.5s ease;
 }
@@ -617,10 +493,7 @@ body::after {
 .task-card:hover {
     transform: translateY(-2px) scale(1.02);
     border-color: #00ff00;
-    box-shadow:
-        0 0 20px rgba(0, 255, 0, 0.5),
-        0 0 40px rgba(0, 255, 0, 0.3),
-        inset 0 0 20px rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), 0 0 40px rgba(0, 255, 0, 0.3), inset 0 0 20px rgba(0, 255, 0, 0.1);
 }
 
 /* Corrupted text effect */
@@ -662,18 +535,8 @@ body::after {
 .kanban-column::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 255, 0, 0.03) 2px,
-            rgba(0, 255, 0, 0.03) 4px
-        );
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px);
     pointer-events: none;
 }
 
@@ -722,10 +585,8 @@ body::after {
 .cyber-button::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
     transition: left 0.5s ease;
 }
@@ -742,10 +603,8 @@ body::after {
 /* Static noise overlay with enhanced glitch */
 .static-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
     opacity: 0.03;
     z-index: 1000;
@@ -772,15 +631,9 @@ body::after {
 }
 
 @keyframes flicker {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 1;
-    }
-    20%, 24%, 55% {
-        opacity: 0.3;
-    }
-    22% {
-        opacity: 0.7;
-    }
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: 0.3; }
+    22% { opacity: 0.7; }
 }
 
 /* Delete button */
@@ -800,8 +653,7 @@ body::after {
 /* Copyright footer with glitch */
 .copyright {
     position: fixed;
-    bottom: 10px;
-    left: 50%;
+    bottom: 10px; left: 50%;
     transform: translateX(-50%);
     color: #00ff00;
     font-size: 10px;
@@ -811,43 +663,21 @@ body::after {
     letter-spacing: 2px;
     z-index: 100;
     animation: copyright-pulse 4s ease-in-out infinite;
-    text-shadow:
-        0 0 2px rgba(0, 255, 0, 0.5),
-        0 0 5px rgba(0, 255, 0, 0.3);
+    text-shadow: 0 0 2px rgba(0, 255, 0, 0.5), 0 0 5px rgba(0, 255, 0, 0.3);
 }
 
 @keyframes copyright-pulse {
-    0%, 100% {
-        opacity: 0.6;
-        color: #00ff00;
-        text-shadow: 0 0 2px rgba(0, 255, 0, 0.5);
-    }
-    50% {
-        opacity: 0.8;
-        color: #00ffff;
-        text-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
-    }
-    95% {
-        opacity: 0.6;
-        color: #00ff00;
-    }
-    96% {
-        opacity: 1;
-        color: #ff00ff;
-        text-shadow: 0 0 10px rgba(255, 0, 255, 1);
-        transform: translateX(-50%) skewX(10deg);
-    }
-    97% {
-        opacity: 0.6;
-        transform: translateX(-50%) skewX(0deg);
-    }
+    0%, 100% { opacity: 0.6; color: #00ff00; text-shadow: 0 0 2px rgba(0, 255, 0, 0.5); }
+    50% { opacity: 0.8; color: #00ffff; text-shadow: 0 0 5px rgba(0, 255, 255, 0.8); }
+    95% { opacity: 0.6; color: #00ff00; }
+    96% { opacity: 1; color: #ff00ff; text-shadow: 0 0 10px rgba(255, 0, 255, 1); transform: translateX(-50%) skewX(10deg); }
+    97% { opacity: 0.6; transform: translateX(-50%) skewX(0deg); }
 }
 
 /* Activity Feed Styles */
 .activity-feed {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 20px; right: 20px;
     width: 300px;
     max-height: 200px;
     background: rgba(0, 0, 0, 0.9);
@@ -870,21 +700,14 @@ body::after {
 }
 
 @keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
 /* Online Users Panel */
 .users-panel {
     position: fixed;
-    top: 100px;
-    right: 20px;
+    top: 100px; right: 20px;
     width: 200px;
     background: rgba(0, 0, 0, 0.9);
     border: 1px solid #00ffff;
@@ -902,8 +725,7 @@ body::after {
 }
 
 .user-status {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     background: #00ff00;
     border-radius: 50%;
     animation: pulse 2s infinite;
@@ -912,8 +734,7 @@ body::after {
 /* Typing indicator */
 .typing-indicator {
     position: fixed;
-    bottom: 230px;
-    left: 50%;
+    bottom: 230px; left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 255, 0, 0.1);
     border: 1px solid #00ff00;
@@ -940,8 +761,7 @@ body::after {
 /* Connection status badge */
 .connection-badge {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 20px; right: 20px;
     padding: 5px 15px;
     background: rgba(0, 255, 0, 0.2);
     border: 1px solid #00ff00;

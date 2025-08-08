@@ -50,100 +50,119 @@ io.on('connection', (socket) => {
     console.log(`[SOCKET] ${data.name} joined the war room`);
   });
   
- // Replace this entire function in server.js
-socket.on('task:create', (data) => {
-  const user = connectedUsers.get(socket.id);
+  // Task created
+  socket.on('task:create', (data) => {
+    const user = connectedUsers.get(socket.id);
 
-  // --- VALIDATION: Ensure incoming data is valid before processing ---
-  if (!data || typeof data.text !== 'string' || data.text.trim() === '' || typeof data.assignee !== 'string') {
-    console.error('[SOCKET_ERROR] Invalid task creation data received:', data);
-    // You can optionally emit an error back to the specific user here
-    // socket.emit('operation_failed', { message: 'Invalid task data.' });
-    return;
-  }
-
-  const task = {
-    id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    text: data.text.trim(),
-    status: 'todo',
-    assignee: data.assignee,
-    createdBy: user?.name || 'Unknown'
-  };
-
-  db.run(
-    "INSERT INTO tasks (id, text, status, assignee) VALUES (?, ?, ?, ?)",
-    [task.id, task.text, task.status, task.assignee],
-    (err) => {
-      if (err) {
-        // --- ERROR LOGGING: Log the specific database error ---
-        console.error('[DB_ERROR] Failed to insert new task:', err.message);
+    // --- VALIDATION: Ensure incoming data is valid before processing ---
+    if (!data || typeof data.text !== 'string' || data.text.trim() === '' || typeof data.assignee !== 'string') {
+        console.error('[SOCKET_ERROR] Invalid task creation data received:', data);
+        // Optionally emit an error back to the specific user
+        socket.emit('operation_failed', { message: 'Invalid task data.' });
         return;
-      }
-      
-      console.log(`[DB_SUCCESS] Task created by ${user?.name || 'unknown'}. Broadcasting...`);
-
-      // On success, broadcast the new task to ALL clients
-      io.emit('task:created', {
-        task: task,
-        user: user?.name,
-        timestamp: new Date()
-      });
-      
-      // Also broadcast a generic activity update
-      io.emit('activity', {
-        type: 'task_created',
-        message: `⚡ ${user.name || 'Agent'} created task: "${task.text}"`,
-        timestamp: new Date()
-      });
     }
-  );
-});
-          
-          // Activity log
-          io.emit('activity', {
-            type: 'task_moved',
-            user: user?.name,
-            taskId: data.taskId,
-            status: data.status,
-            timestamp: new Date()
-          });
-          
-          // Celebration if moved to done
-          if (data.status === 'done') {
-            io.emit('celebration', {
-              user: user?.name,
-              taskId: data.taskId
+
+    const task = {
+        id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        text: data.text.trim(),
+        status: 'todo',
+        assignee: data.assignee,
+        createdBy: user?.name || 'Unknown'
+    };
+
+    db.run(
+        "INSERT INTO tasks (id, text, status, assignee) VALUES (?, ?, ?, ?)",
+        [task.id, task.text, task.status, task.assignee],
+        (err) => {
+            if (err) {
+                // --- ERROR LOGGING: Log the specific database error ---
+                console.error('[DB_ERROR] Failed to insert new task:', err.message);
+                return;
+            }
+            
+            console.log(`[DB_SUCCESS] Task created by ${user?.name || 'unknown'}. Broadcasting...`);
+
+            // On success, broadcast the new task to ALL clients
+            io.emit('task:created', {
+                task: task,
+                user: user?.name,
+                timestamp: new Date()
             });
-          }
+            
+            // Also broadcast a generic activity update
+            io.emit('activity', {
+                type: 'task_created',
+                message: `⚡ ${user?.name || 'Agent'} created task: "${task.text}"`,
+                timestamp: new Date()
+            });
+        }
+    );
+  });
+  
+  // Task moved
+  socket.on('task:move', (data) => {
+    const user = connectedUsers.get(socket.id);
+    
+    db.run(
+      "UPDATE tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [data.status, data.taskId],
+      (err) => {
+        if (err) {
+            console.error('[DB_ERROR] Failed to update task:', err.message);
+            return;
+        }
+        
+        // Broadcast to all clients
+        io.emit('task:moved', {
+            taskId: data.taskId,
+            newStatus: data.status,
+            movedBy: user?.name,
+            timestamp: new Date()
+        });
+        
+        // Activity log
+        io.emit('activity', {
+            type: 'task_moved',
+            message: `[ ${user?.name} moved task to ${data.status.toUpperCase()} ]`,
+            timestamp: new Date()
+        });
+        
+        // Celebration if moved to done
+        if (data.status === 'done') {
+            io.emit('celebration', {
+                user: user?.name,
+                taskId: data.taskId
+            });
         }
       }
     );
   });
   
   // Task deleted
-  socket.on('task:delete', async (data) => {
+  socket.on('task:delete', (data) => {
     const user = connectedUsers.get(socket.id);
     
     db.run("DELETE FROM tasks WHERE id = ?", [data.taskId], (err) => {
-      if (!err) {
-        io.emit('task:deleted', {
+      if (err) {
+          console.error('[DB_ERROR] Failed to delete task:', err.message);
+          return;
+      }
+      io.emit('task:deleted', {
           taskId: data.taskId,
           deletedBy: user?.name,
           timestamp: new Date()
-        });
-        
-        io.emit('activity', {
+      });
+      
+      io.emit('activity', {
           type: 'task_deleted',
-          user: user?.name,
-          taskId: data.taskId,
+          message: `TARGET PURGED by ${user?.name}`,
           timestamp: new Date()
-        });
-      }
+      });
     });
   });
   
   // Typing indicators
-  socket.on('typing:start', (data) => {
+  socket.on('typing:start', () => {
     const user = connectedUsers.get(socket.id);
     if (user) {
       typingUsers.add(user.name);
@@ -151,7 +170,7 @@ socket.on('task:create', (data) => {
     }
   });
   
-  socket.on('typing:stop', (data) => {
+  socket.on('typing:stop', () => {
     const user = connectedUsers.get(socket.id);
     if (user) {
       typingUsers.delete(user.name);
@@ -196,7 +215,7 @@ socket.on('task:create', (data) => {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve your HTML and dllogoonly.png from public folder
+app.use(express.static('public')); // Serve your HTML and other assets from public folder
 
 // Database setup
 const dbPath = process.env.NODE_ENV === 'production' 
@@ -278,84 +297,6 @@ app.get('/api/tasks', (req, res) => {
       res.status(500).json({ error: 'Failed to fetch tasks' });
     } else {
       res.json(tasks);
-    }
-  });
-});
-
-// Get single task
-app.get('/api/tasks/:id', (req, res) => {
-  db.get("SELECT * FROM tasks WHERE id = ?", [req.params.id], (err, task) => {
-    if (err) {
-      res.status(500).json({ error: 'Failed to fetch task' });
-    } else if (!task) {
-      res.status(404).json({ error: 'Task not found' });
-    } else {
-      res.json(task);
-    }
-  });
-});
-
-// Create new task
-app.post('/api/tasks', (req, res) => {
-  const { text, assignee } = req.body;
-  
-  if (!text || !assignee) {
-    return res.status(400).json({ error: 'Text and assignee are required' });
-  }
-  
-  const task = {
-    id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    text,
-    status: 'todo',
-    assignee
-  };
-  
-  db.run(
-    "INSERT INTO tasks (id, text, status, assignee) VALUES (?, ?, ?, ?)",
-    [task.id, task.text, task.status, task.assignee],
-    function(err) {
-      if (err) {
-        console.error('[API_ERROR] Failed to create task:', err);
-        res.status(500).json({ error: 'Failed to create task' });
-      } else {
-        res.status(201).json(task);
-      }
-    }
-  );
-});
-
-// Update task status
-app.put('/api/tasks/:id', (req, res) => {
-  const { status } = req.body;
-  
-  if (!status || !['todo', 'inprogress', 'done'].includes(status)) {
-    return res.status(400).json({ error: 'Valid status is required' });
-  }
-  
-  db.run(
-    "UPDATE tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-    [status, req.params.id],
-    function(err) {
-      if (err) {
-        res.status(500).json({ error: 'Failed to update task' });
-      } else if (this.changes === 0) {
-        res.status(404).json({ error: 'Task not found' });
-      } else {
-        res.json({ id: req.params.id, status });
-      }
-    }
-  );
-});
-
-// Delete task
-app.delete('/api/tasks/:id', (req, res) => {
-  db.run("DELETE FROM tasks WHERE id = ?", [req.params.id], function(err) {
-    if (err) {
-      res.status(500).json({ error: 'Failed to delete task' });
-    } else if (this.changes === 0) {
-      res.status(404).json({ error: 'Task not found' });
-    } else {
-      res.status(204).send();
     }
   });
 });
