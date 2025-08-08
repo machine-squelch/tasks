@@ -1,0 +1,31 @@
+{
+  "name": "dluxe-task-tracker-backend",
+  "version": "1.0.0",
+  "description": "Simple SQLite backend for DLuxe Task Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required'"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "sqlite3": "^5.1.7",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "keywords": [
+    "task-tracker",
+    "sqlite",
+    "express",
+    "api"
+  ],
+  "author": "DLW Agents",
+  "license": "MIT"
+}

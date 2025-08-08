@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DL///WAR_ROOM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: #0a0a0a;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background with noise */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
+            animation: scanlines 8s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        /* Logo glitch effects */
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            animation: logo-float 4s ease-in-out infinite;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                transparent 0%,
+                rgba(0, 255, 0, 0.1) 45%,
+                rgba(0, 255, 0, 0.3) 50%,
+                rgba(0, 255, 0, 0.1) 55%,
+                transparent 100%
+            );
+            animation: scan-line 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan-line {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+
+        @keyframes matrix-rain {
+            0% { transform: translateY(-100%); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        @keyframes logo-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo-glitch {
+            width: 120px;
+            height: 120px;
+            filter: 
+                hue-rotate(120deg) 
+                saturate(1.5) 
+                brightness(1.2)
+                drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
+            animation: logo-glitch-effect 3s infinite;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-glitch:hover {
+            transform: scale(1.1);
+            filter: 
+                hue-rotate(180deg) 
+                saturate(2.5) 
+                brightness(1.5)
+                drop-shadow(0 0 40px rgba(0, 255, 255, 0.9))
+                contrast(1.2);
+            animation: logo-glitch-burst 0.3s infinite;
+        }
+
+        @keyframes logo-glitch-burst {
+            0% { transform: scale(1.1) rotate(0deg); }
+            25% { transform: scale(1.15) rotate(-2deg) translateX(-2px); }
+            50% { transform: scale(1.1) rotate(2deg) translateY(-2px); }
+            75% { transform: scale(1.12) rotate(-1deg) translateX(2px); }
+            100% { transform: scale(1.1) rotate(0deg); }
+        }
+
+        .logo-glitch::before,
+        .logo-glitch::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('dllogoonly.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.8;
+        }
+
+        .logo-glitch::before {
+            animation: logo-glitch-1 0.5s infinite;
+            filter: hue-rotate(90deg) saturate(2);
+            z-index: -1;
+        }
+
+        .logo-glitch::after {
+            animation: logo-glitch-2 0.5s infinite;
+            filter: hue-rotate(180deg) saturate(2);
+            z-index: -2;
+        }
+
+        @keyframes logo-glitch-effect {
+            0%, 100% { 
+                filter: hue-rotate(120deg) saturate(1.5) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
+            }
+            20% { 
+                filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
+            }
+            40% { 
+                filter: hue-rotate(100deg) saturate(1.8) brightness(1.1) drop-shadow(0 0 25px rgba(255, 0, 255, 0.6));
+            }
+            60% { 
+                filter: hue-rotate(160deg) saturate(1.3) brightness(1.3) drop-shadow(0 0 35px rgba(0, 255, 0, 0.9));
+            }
+            80% { 
+                filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7));
+            }
+            /* Random corruption glitches */
+            23% { 
+                filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)) invert(1);
+                transform: skewX(20deg);
+            }
+            23.5% { 
+                filter: hue-rotate(140deg) saturate(2) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
+                transform: skewX(0deg);
+            }
+            77% { 
+                filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7)) contrast(3);
+                transform: scaleX(1.3) scaleY(0.8);
+            }
+            77.5% { 
+                filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7));
+                transform: scaleX(1) scaleY(1);
+            }
+        }
+
+        @keyframes logo-glitch-1 {
+            0%, 100% { 
+                clip: rect(0, 150px, 40px, 0); 
+                transform: translateX(0);
+            }
+            20% { 
+                clip: rect(40px, 150px, 80px, 0); 
+                transform: translateX(-2px);
+            }
+            40% { 
+                clip: rect(80px, 150px, 120px, 0); 
+                transform: translateX(2px);
+            }
+            60% { 
+                clip: rect(20px, 150px, 60px, 0); 
+                transform: translateX(-1px);
+            }
+            80% { 
+                clip: rect(60px, 150px, 100px, 0); 
+                transform: translateX(1px);
+            }
+        }
+
+        @keyframes logo-glitch-2 {
+            0%, 100% { 
+                clip: rect(0, 150px, 60px, 0); 
+                transform: translateX(0) scaleX(-1);
+            }
+            20% { 
+                clip: rect(60px, 150px, 120px, 0); 
+                transform: translateX(2px) scaleX(-1);
+            }
+            40% { 
+                clip: rect(30px, 150px, 90px, 0); 
+                transform: translateX(-2px) scaleX(-1);
+            }
+            60% { 
+                clip: rect(90px, 150px, 120px, 0); 
+                transform: translateX(1px) scaleX(-1);
+            }
+            80% { 
+                clip: rect(0, 150px, 30px, 0); 
+                transform: translateX(-1px) scaleX(-1);
+            }
+        }
+
+        /* Glitch effect for headers */
+        .glitch {
+            position: relative;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 
+                0.05em 0 0 rgba(255, 0, 0, .75),
+                -0.025em -0.05em 0 rgba(0, 255, 0, .75),
+                0.025em 0.05em 0 rgba(0, 100, 255, .75);
+            animation: glitch 2s infinite;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch-1 0.5s infinite;
+            color: #00ff00;
+            z-index: -1;
+        }
+
+        .glitch::after {
+            animation: glitch-2 0.5s infinite;
+            color: #ff00ff;
+            z-index: -2;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75), -0.025em -0.05em 0 rgba(0, 255, 0, .75), 0.025em 0.05em 0 rgba(0, 100, 255, .75); }
+            14% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75), -0.025em -0.05em 0 rgba(0, 255, 0, .75), 0.025em 0.05em 0 rgba(0, 100, 255, .75); }
+            15% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, .75), 0.025em 0.025em 0 rgba(0, 255, 0, .75), -0.05em -0.05em 0 rgba(0, 100, 255, .75); }
+            49% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, .75), 0.025em 0.025em 0 rgba(0, 255, 0, .75), -0.05em -0.05em 0 rgba(0, 100, 255, .75); }
+            50% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, .75), 0.05em 0 0 rgba(0, 255, 0, .75), 0 -0.05em 0 rgba(0, 100, 255, .75); }
+            99% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, .75), 0.05em 0 0 rgba(0, 255, 0, .75), 0 -0.05em 0 rgba(0, 100, 255, .75); }
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { clip: rect(42px, 9999px, 44px, 0); transform: skew(0.3deg); }
+            5% { clip: rect(12px, 9999px, 59px, 0); transform: skew(0.9deg); }
+            10% { clip: rect(85px, 9999px, 32px, 0); transform: skew(0.2deg); }
+            15% { clip: rect(21px, 9999px, 78px, 0); transform: skew(0.8deg); }
+            20% { clip: rect(65px, 9999px, 98px, 0); transform: skew(0.4deg); }
+            25% { clip: rect(31px, 9999px, 17px, 0); transform: skew(0.1deg); }
+            30% { clip: rect(93px, 9999px, 43px, 0); transform: skew(0.7deg); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { clip: rect(65px, 9999px, 119px, 0); transform: skew(0.5deg); }
+            5% { clip: rect(79px, 9999px, 36px, 0); transform: skew(0.2deg); }
+            10% { clip: rect(24px, 9999px, 67px, 0); transform: skew(0.6deg); }
+            15% { clip: rect(91px, 9999px, 13px, 0); transform: skew(0.3deg); }
+            20% { clip: rect(14px, 9999px, 88px, 0); transform: skew(0.8deg); }
+        }
+
+        /* Neon glow effects */
+        .neon-border {
+            position: relative;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .neon-border::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff00, #00ffff, #ff00ff, #ffff00);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0.7;
+            filter: blur(2px);
+            animation: neon-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes neon-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Distressed task cards */
+        .task-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(255, 0, 255, 0.1));
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: move;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .task-card:hover::before {
+            left: 100%;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px) scale(1.02);
+            border-color: #00ff00;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                0 0 40px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        /* Corrupted text effect */
+        .corrupted {
+            animation: corrupt 3s infinite;
+        }
+
+        @keyframes corrupt {
+            0%, 95%, 100% { opacity: 1; }
+            96% { opacity: 0.3; }
+            97% { opacity: 1; transform: skewX(10deg); }
+            98% { transform: skewX(-10deg); }
+            99% { transform: skewX(0); }
+        }
+
+        @keyframes mega-glitch {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+            10% { transform: scale(1.1) rotate(-2deg) translateX(-10px); filter: hue-rotate(90deg) invert(1); }
+            20% { transform: scale(0.9) rotate(3deg) translateY(10px); filter: hue-rotate(180deg); }
+            30% { transform: scale(1.05) rotate(-1deg) translateX(15px); filter: hue-rotate(270deg) invert(1); }
+            40% { transform: scale(0.95) rotate(2deg) translateY(-15px); filter: hue-rotate(360deg); }
+            50% { transform: scale(1.02) rotate(-3deg) translateX(-5px); filter: hue-rotate(45deg) contrast(2); }
+            60% { transform: scale(0.98) rotate(1deg) translateY(5px); filter: hue-rotate(135deg) invert(1); }
+            70% { transform: scale(1.03) rotate(-2deg) translateX(10px); filter: hue-rotate(225deg); }
+            80% { transform: scale(0.97) rotate(3deg) translateY(-10px); filter: hue-rotate(315deg) invert(1); }
+            90% { transform: scale(1.01) rotate(-1deg) translateX(-2px); filter: hue-rotate(60deg); }
+        }
+
+        /* Column styles */
+        .kanban-column {
+            min-height: 500px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid;
+            position: relative;
+            backdrop-filter: blur(5px);
+            overflow: hidden;
+        }
+
+        .kanban-column::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 2px,
+                    rgba(0, 255, 0, 0.03) 4px
+                );
+            pointer-events: none;
+        }
+
+        #todo { border-color: #00ff00; }
+        #inprogress { border-color: #00ffff; }
+        #done { border-color: #ff00ff; }
+
+        .drag-over {
+            background: rgba(0, 255, 0, 0.1) !important;
+            border: 2px dashed #00ff00 !important;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Input styles */
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .cyber-button {
+            background: linear-gradient(45deg, #00ff00, #00ffff);
+            color: #000;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        .cyber-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+        }
+
+        /* Static noise overlay */
+        .static-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 1000;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        /* Flicker animation */
+        .flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.3;
+            }
+            22% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Delete button */
+        .delete-btn {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: #ff0000;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Activity Feed Styles */
+        .activity-feed {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 200px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            z-index: 100;
+            font-size: 12px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .activity-item {
+            color: #00ff00;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 2px solid #00ff00;
+            padding-left: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Online Users Panel */
+        .users-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 200px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 100;
+        }
+
+        .user-item {
+            color: #00ffff;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-status {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            position: fixed;
+            bottom: 230px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #00ff00;
+            font-size: 12px;
+            z-index: 100;
+            animation: pulse 1s infinite;
+        }
+
+        /* Task being dragged by others */
+        .dragged-by-other {
+            opacity: 0.5;
+            border: 2px dashed #ff00ff !important;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Connection status badge */
+        .connection-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 5px 15px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            border-radius: 20px;
+            color: #00ff00;
+            font-size: 11px;
+            font-family: 'Share Tech Mono', monospace;
+            animation: pulse 3s infinite;
+        }
+
+        .connection-badge.disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+            color: #ff0000;
+            animation: flicker 0.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="static-overlay"></div>
+    
+    <!-- Connection Status -->
+    <div id="connection-badge" class="connection-badge">
+        [CONNECTING...]
+    </div>
+    
+    <!-- Online Users Panel -->
+    <div class="users-panel">
+        <h3 class="text-cyan-400 text-sm font-bold mb-2">[AGENTS_ONLINE]</h3>
+        <div id="users-list"></div>
+    </div>
+    
+    <!-- Activity Feed -->
+    <div class="activity-feed">
+        <h3 class="text-green-400 text-sm font-bold mb-2">[ACTIVITY_MATRIX]</h3>
+        <div id="activity-list"></div>
+    </div>
+    
+    <!-- Typing Indicator -->
+    <div id="typing-indicator" class="typing-indicator" style="display: none;">
+        <span id="typing-text"></span>
+    </div>
+    
+    <div class="container mx-auto p-4 md:p-8 relative z-10">
+        <header class="text-center mb-12">
+            <div class="logo-container mb-6">
+                <img src="dllogoonly.png" alt="DL" class="logo-glitch mx-auto" onclick="triggerMegaGlitch()">
+                <div class="absolute inset-0 pointer-events-none opacity-30">
+                    <div class="text-green-400 text-xs font-mono" style="animation: matrix-rain 2s linear infinite;">
+                        01001100 01010101 01011000 01000101
+                    </div>
+                </div>
+            </div>
+            <div class="inline-block mb-8">
+                <h1 class="glitch text-5xl md:text-7xl text-green-400 mb-2" data-text="DIGITAL_WAR_ROOM">DIGITAL_WAR_ROOM</h1>
+                <div class="text-cyan-400 text-sm tracking-widest flicker">
+                    [REAL_TIME_SYNC_ENABLED]
+                </div>
+            </div>
+            
+            <p class="text-green-400 text-lg corrupted">SALES_TEAM /// SYNCHRONIZED_OPERATIONS_CENTER</p>
+            <div id="auth-info" class="mt-4 text-sm">
+                <p class="text-cyan-400">TEAM: <strong class="text-yellow-400 glitch" data-text="DLW_AGENTS">DLW_AGENTS</strong></p>
+                <p class="text-gray-500 text-xs mt-2">
+                    <span class="flicker">CONNECTION_ESTABLISHED</span> | 
+                    <span id="time" class="text-green-400"></span> |
+                    <span id="db-status" class="text-green-400">[INITIALIZING]</span>
+                </p>
+            </div>
+        </header>
+
+        <div class="mb-8 max-w-lg mx-auto neon-border rounded-xl p-6">
+            <h2 class="text-2xl font-bold mb-4 text-center text-cyan-400 glitch" data-text="INJECT_TASK">INJECT_TASK</h2>
+            <form id="add-task-form">
+                <div class="mb-4">
+                    <label for="assignee-select" class="block text-sm text-green-400 mb-2">TARGET_AGENT:</label>
+                    <select id="assignee-select" class="cyber-input w-full px-4 py-2 rounded">
+                        <option>Adam</option>
+                        <option>Nick</option>
+                        <option>Omar</option>
+                    </select>
+                </div>
+                <input type="text" id="task-input" placeholder="&gt; Enter task parameters..." 
+                    class="cyber-input w-full px-4 py-2 rounded" required>
+                <button type="submit" class="cyber-button w-full mt-4 py-3 px-4 rounded font-bold">
+                    EXECUTE_COMMAND
+                </button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div id="todo" class="kanban-column rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-4 text-center text-green-400">
+                    <span class="corrupted">[PENDING]</span>
+                </h2>
+                <div id="todo-tasks" class="space-y-4 relative z-10"></div>
+            </div>
+
+            <div id="inprogress" class="kanban-column rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-4 text-center text-cyan-400">
+                    <span class="corrupted">[PROCESSING]</span>
+                </h2>
+                <div id="inprogress-tasks" class="space-y-4 relative z-10"></div>
+            </div>
+
+            <div id="done" class="kanban-column rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-4 text-center text-pink-400">
+                    <span class="corrupted">[TERMINATED]</span>
+                </h2>
+                <div id="done-tasks" class="space-y-4 relative z-10"></div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        /*
+         * DATABASE CONFIGURATION
+         * ======================
+         * Current: IndexedDB (browser-based storage)
+         * - Data persists locally in user's browser
+         * - No server needed, works offline
+         * - Data is per-device (no sync between devices)
+         * 
+         * IMPORTANT: Place dllogoonly.png in the same directory as index.html
+         * For Digital Ocean deployment, put it in the public/ folder
+         * 
+         * UPGRADE OPTIONS FOR BACKEND:
+         * 
+         * Option 1: SQLite + Express.js (Simplest)
+         * - npm install express sqlite3 cors
+         * - Single file database, no config needed
+         * - Perfect for small teams (<100 users)
+         * 
+         * Option 2: Firebase Realtime Database (Easiest cloud)
+         * - Real-time sync across devices
+         * - No backend code needed
+         * - Free tier: 1GB storage, 10GB/month transfer
+         * 
+         * Option 3: Supabase (Open source Firebase alternative)
+         * - PostgreSQL database
+         * - Built-in auth & real-time
+         * - Free tier: 500MB database, 2GB bandwidth
+         * 
+         * To implement backend: Replace the fetch/add/update/delete functions
+         * with actual API calls to your chosen backend.
+         */
+
+        // Clock display
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            const dateString = now.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.');
+            document.getElementById('time').textContent = `${dateString} // ${timeString}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Mega glitch effect when clicking logo
+        function triggerMegaGlitch() {
+            document.body.style.animation = 'mega-glitch 0.5s';
+            
+            // Add temporary glitch class to everything
+            const elements = document.querySelectorAll('*');
+            elements.forEach(el => {
+                el.style.animation = 'corrupt 0.5s';
+            });
+            
+            // Flash screen colors
+            const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ffff00', '#ff0000'];
+            let colorIndex = 0;
+            const flashInterval = setInterval(() => {
+                document.body.style.backgroundColor = colors[colorIndex];
+                colorIndex++;
+                if (colorIndex >= colors.length) {
+                    clearInterval(flashInterval);
+                    document.body.style.backgroundColor = '';
+                    document.body.style.animation = '';
+                    elements.forEach(el => {
+                        el.style.animation = '';
+                    });
+                }
+            }, 100);
+            
+            // Console effect
+            console.log('%c[SYSTEM_BREACH] MEGA_GLITCH_ACTIVATED', 'color: #00ff00; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #00ff00;');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let tasks = [];
+            let db;
+            let socket;
+            let currentUser = '';
+            let isTyping = false;
+            let typingTimeout;
+            
+            // Ask for user name
+            const names = ['Adam', 'Nick', 'Omar'];
+            currentUser = prompt('AGENT_IDENTIFICATION_REQUIRED:', 'Adam') || names[Math.floor(Math.random() * names.length)];
+            
+            // Initialize Socket.IO connection
+            function initializeSocket() {
+                const socketUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:8080' 
+                    : window.location.origin;
+                    
+                socket = io(socketUrl);
+                
+                // Connection events
+                socket.on('connect', () => {
+                    console.log('[SOCKET] Connected to war room');
+                    document.getElementById('connection-badge').textContent = '[LIVE_SYNC_ACTIVE]';
+                    document.getElementById('connection-badge').className = 'connection-badge';
+                    
+                    // Join with user name
+                    socket.emit('user:join', { name: currentUser });
+                });
+                
+                socket.on('disconnect', () => {
+                    console.log('[SOCKET] Disconnected from war room');
+                    document.getElementById('connection-badge').textContent = '[CONNECTION_LOST]';
+                    document.getElementById('connection-badge').className = 'connection-badge disconnected';
+                });
+                
+                // User updates
+                socket.on('users:update', (users) => {
+                    updateOnlineUsers(users);
+                });
+                
+                // Task events
+                socket.on('task:created', (data) => {
+                    if (data.user !== currentUser) {
+                        tasks.push(data.task);
+                        renderTasks();
+                        addActivity(`${data.user} created: "${data.task.text}"`);
+                    }
+                });
+                
+                socket.on('task:moved', (data) => {
+                    if (data.movedBy !== currentUser) {
+                        const task = tasks.find(t => t.id === data.taskId);
+                        if (task) {
+                            task.status = data.newStatus;
+                            renderTasks();
+                            addActivity(`${data.movedBy} moved task to ${data.newStatus.toUpperCase()}`);
+                        }
+                    }
+                });
+                
+                socket.on('task:deleted', (data) => {
+                    if (data.deletedBy !== currentUser) {
+                        tasks = tasks.filter(t => t.id !== data.taskId);
+                        renderTasks();
+                        addActivity(`${data.deletedBy} purged a task`);
+                    }
+                });
+                
+                // Typing indicators
+                socket.on('typing:update', (typingUsers) => {
+                    updateTypingIndicator(typingUsers);
+                });
+                
+                // Dragging indicators
+                socket.on('task:drag:other', (data) => {
+                    const taskEl = document.querySelector(`[data-id="${data.taskId}"]`);
+                    if (taskEl) {
+                        taskEl.classList.add('dragged-by-other');
+                        taskEl.setAttribute('title', `${data.user} is moving this`);
+                    }
+                });
+                
+                socket.on('task:drag:other:end', (data) => {
+                    const taskEl = document.querySelector(`[data-id="${data.taskId}"]`);
+                    if (taskEl) {
+                        taskEl.classList.remove('dragged-by-other');
+                        taskEl.removeAttribute('title');
+                    }
+                });
+                
+                // Celebrations
+                socket.on('celebration', (data) => {
+                    if (data.user !== currentUser) {
+                        triggerGlitchConfetti();
+                        addActivity(`🎉 ${data.user} completed a task!`);
+                    }
+                });
+                
+                // Notifications
+                socket.on('notification', (data) => {
+                    addActivity(data.message);
+                });
+                
+                // Activity feed
+                socket.on('activity', (data) => {
+                    // Activity already handled in specific events
+                });
+            }
+            
+            function updateOnlineUsers(users) {
+                const usersList = document.getElementById('users-list');
+                usersList.innerHTML = users.map(user => `
+                    <div class="user-item">
+                        <div class="user-status"></div>
+                        <span>${user.name}${user.name === currentUser ? ' (YOU)' : ''}</span>
+                    </div>
+                `).join('');
+            }
+            
+            function updateTypingIndicator(typingUsers) {
+                const indicator = document.getElementById('typing-indicator');
+                const text = document.getElementById('typing-text');
+                
+                if (typingUsers.length > 0) {
+                    indicator.style.display = 'block';
+                    text.textContent = `[${typingUsers.join(', ')} TYPING...]`;
+                } else {
+                    indicator.style.display = 'none';
+                }
+            }
+            
+            function addActivity(message) {
+                const activityList = document.getElementById('activity-list');
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.textContent = `> ${message}`;
+                activityList.insertBefore(item, activityList.firstChild);
+                
+                // Keep only last 10 activities
+                while (activityList.children.length > 10) {
+                    activityList.removeChild(activityList.lastChild);
+                }
+            }
+
+            // Backend API configuration
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:8080/api'  // Local development
+                : '/api';  // Production (same domain)
+            
+            let useBackend = true;  // Try backend first, fallback to IndexedDB if fails
+
+            // Initialize IndexedDB for fallback storage
+            const DB_NAME = 'DLuxeTaskDB';
+            const DB_VERSION = 1;
+            const STORE_NAME = 'tasks';
+
+            // Check backend connectivity
+            async function checkBackendConnection() {
+                try {
+                    const response = await fetch(`${API_URL}/health`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    return data.status === 'online';
+                } catch (error) {
+                    console.log('[SYSTEM] Backend offline, using local storage');
+                    return false;
+                }
+            }
+
+            // Initialize database (IndexedDB fallback)
+            async function initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    
+                    request.onerror = () => {
+                        console.error("[DB_ERROR] Failed to open IndexedDB");
+                        reject(request.error);
+                    };
+                    
+                    request.onsuccess = () => {
+                        db = request.result;
+                        console.log("[DB_SUCCESS] IndexedDB initialized (fallback mode)");
+                        resolve(db);
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        db = event.target.result;
+                        
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                            objectStore.createIndex('status', 'status', { unique: false });
+                            objectStore.createIndex('assignee', 'assignee', { unique: false });
+                            console.log("[DB_UPGRADE] IndexedDB store created");
+                        }
+                    };
+                });
+            }
+
+            // Fetch all tasks - uses API for initial load
+            async function fetchTasksFromAPI() {
+                console.log("[SYSTEM] Loading task data...");
+                
+                // Try backend first
+                if (useBackend) {
+                    try {
+                        const response = await fetch(`${API_URL}/tasks`);
+                        if (response.ok) {
+                            const tasks = await response.json();
+                            console.log(`[SYSTEM] Loaded ${tasks.length} tasks from backend`);
+                            return tasks;
+                        }
+                    } catch (error) {
+                        console.log("[SYSTEM] Backend unavailable, using local storage");
+                        useBackend = false;
+                    }
+                }
+                
+                // Fallback to IndexedDB
+                if (!db) {
+                    console.log("[SYSTEM] No database available");
+                    return [];
+                }
+                
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([STORE_NAME], 'readonly');
+                    const objectStore = transaction.objectStore(STORE_NAME);
+                    const request = objectStore.getAll();
+                    
+                    request.onsuccess = () => {
+                        const tasks = request.result;
+                        console.log(`[SYSTEM] Loaded ${tasks.length} tasks from local storage`);
+                        resolve(tasks);
+                    };
+                    
+                    request.onerror = () => {
+                        console.error("[DB_ERROR] Failed to fetch tasks");
+                        reject(request.error);
+                    };
+                });
+            }
+
+            // Save task to IndexedDB (local backup)
+            async function saveTaskToDB(taskData) {
+                if (!db) return;
+                
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const objectStore = transaction.objectStore(STORE_NAME);
+                    const request = objectStore.put(taskData);
+                    
+                    request.onsuccess = () => {
+                        console.log("[DB_SUCCESS] Task saved locally:", taskData.id);
+                        resolve(taskData);
+                    };
+                    
+                    request.onerror = () => {
+                        console.error("[DB_ERROR] Failed to save task");
+                        reject(request.error);
+                    };
+                });
+            }
+
+            // Add new task - now uses Socket.IO
+            async function addTaskToAPI(taskData) {
+                console.log("[SYSTEM] Injecting task:", taskData);
+                
+                // Emit to socket for real-time sync
+                if (socket && socket.connected) {
+                    socket.emit('task:create', taskData);
+                    
+                    // Optimistically add to local state
+                    const newTask = { 
+                        ...taskData, 
+                        id: `task-${Date.now()}`,
+                        createdBy: currentUser 
+                    };
+                    tasks.push(newTask);
+                    
+                    // Save local backup
+                    if (db) await saveTaskToDB(newTask);
+                    
+                    addActivity(`You created: "${taskData.text}"`);
+                    return newTask;
+                } else {
+                    // Fallback to API if socket not connected
+                    try {
+                        const response = await fetch(`${API_URL}/tasks`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(taskData)
+                        });
+                        if (response.ok) {
+                            const newTask = await response.json();
+                            return newTask;
+                        }
+                    } catch (error) {
+                        console.log("[SYSTEM] Creating task locally only");
+                    }
+                    
+                    // Last resort: local only
+                    const newTask = { ...taskData, id: `task-${Date.now()}` };
+                    if (db) await saveTaskToDB(newTask);
+                    return newTask;
+                }
+            }
+
+            // Update task status - now uses Socket.IO
+            async function updateTaskInAPI(taskId, newStatus) {
+                console.log(`[SYSTEM] Updating task ${taskId} to status ${newStatus}`);
+                
+                // Emit to socket for real-time sync
+                if (socket && socket.connected) {
+                    socket.emit('task:move', { taskId, status: newStatus });
+                    
+                    // Optimistically update local state
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = newStatus;
+                        if (db) await saveTaskToDB(task);
+                    }
+                    
+                    addActivity(`You moved task to ${newStatus.toUpperCase()}`);
+                    
+                    // Trigger local celebration if done
+                    if (newStatus === 'done') {
+                        triggerGlitchConfetti();
+                    }
+                } else {
+                    // Fallback to API
+                    try {
+                        const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: newStatus })
+                        });
+                        if (!response.ok) throw new Error('Failed');
+                    } catch (error) {
+                        console.log("[SYSTEM] Updating locally only");
+                    }
+                    
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.status = newStatus;
+                        if (db) await saveTaskToDB(task);
+                    }
+                }
+                return true;
+            }
+            
+            // Delete task - now uses Socket.IO
+            async function deleteTaskFromAPI(taskId) {
+                console.log(`[SYSTEM] Purging task ${taskId}`);
+                
+                // Emit to socket for real-time sync
+                if (socket && socket.connected) {
+                    socket.emit('task:delete', { taskId });
+                    
+                    // Optimistically remove from local state
+                    tasks = tasks.filter(t => t.id !== taskId);
+                    
+                    // Remove from local DB
+                    if (db) {
+                        const transaction = db.transaction([STORE_NAME], 'readwrite');
+                        const objectStore = transaction.objectStore(STORE_NAME);
+                        objectStore.delete(taskId);
+                    }
+                    
+                    addActivity('You purged a task');
+                } else {
+                    // Fallback to API
+                    try {
+                        const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+                            method: 'DELETE'
+                        });
+                        if (!response.ok && response.status !== 204) throw new Error('Failed');
+                    } catch (error) {
+                        console.log("[SYSTEM] Deleting locally only");
+                    }
+                    
+                    tasks = tasks.filter(t => t.id !== taskId);
+                    
+                    if (db) {
+                        const transaction = db.transaction([STORE_NAME], 'readwrite');
+                        const objectStore = transaction.objectStore(STORE_NAME);
+                        objectStore.delete(taskId);
+                    }
+                }
+                return true;
+            }
+
+            async function initializeApp() {
+                try {
+                    // Initialize Socket.IO first for real-time features
+                    initializeSocket();
+                    
+                    // Check backend connectivity
+                    useBackend = await checkBackendConnection();
+                    
+                    if (useBackend) {
+                        document.getElementById('db-status').textContent = '[WAR_ROOM_ONLINE]';
+                        document.getElementById('db-status').className = 'text-green-400';
+                        console.log('[SYSTEM] Connected to backend server');
+                    } else {
+                        // Initialize IndexedDB as fallback
+                        await initDB();
+                        document.getElementById('db-status').textContent = '[LOCAL_MODE]';
+                        document.getElementById('db-status').className = 'text-yellow-400';
+                        console.log('[SYSTEM] Running in local mode');
+                    }
+                    
+                    tasks = await fetchTasksFromAPI();
+                    renderTasks();
+                    
+                    // Initial activity message
+                    addActivity('System initialized. Welcome to the war room.');
+                } catch (error) {
+                    console.error("[SYSTEM_ERROR] Failed to initialize:", error);
+                    document.getElementById('db-status').textContent = '[OFFLINE]';
+                    document.getElementById('db-status').className = 'text-red-400';
+                    tasks = [];
+                }
+            }
+
+            function renderTasks() {
+                const todoContainer = document.getElementById('todo-tasks');
+                const inprogressContainer = document.getElementById('inprogress-tasks');
+                const doneContainer = document.getElementById('done-tasks');
+
+                todoContainer.innerHTML = '';
+                inprogressContainer.innerHTML = '';
+                doneContainer.innerHTML = '';
+
+                tasks.forEach(task => {
+                    const taskElement = createTaskElement(task);
+                    switch (task.status) {
+                        case 'inprogress':
+                            inprogressContainer.appendChild(taskElement);
+                            break;
+                        case 'done':
+                            doneContainer.appendChild(taskElement);
+                            break;
+                        case 'todo':
+                        default:
+                            todoContainer.appendChild(taskElement);
+                            break;
+                    }
+                });
+            }
+
+            function createTaskElement(task) {
+                const div = document.createElement('div');
+                div.className = 'task-card p-4 rounded-lg relative text-green-400';
+                div.setAttribute('draggable', 'true');
+                div.dataset.id = task.id;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '[X]';
+                deleteButton.className = 'delete-btn absolute top-2 right-2 px-2 py-1 text-xs rounded';
+                deleteButton.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteTask(task.id);
+                };
+                div.appendChild(deleteButton);
+
+                const content = document.createElement('p');
+                content.textContent = `> ${task.text}`;
+                content.className = 'pr-8 font-mono text-sm';
+                div.appendChild(content);
+
+                if (task.assignee) {
+                    const assigneeInfo = document.createElement('div');
+                    assigneeInfo.className = 'mt-3 flex items-center';
+                    
+                    const assigneeName = document.createElement('span');
+                    assigneeName.className = 'text-xs text-cyan-400';
+                    assigneeName.textContent = `AGENT_${task.assignee.toUpperCase()}`;
+                    
+                    assigneeInfo.appendChild(assigneeName);
+                    div.appendChild(assigneeInfo);
+                }
+                
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragend', handleDragEnd);
+
+                return div;
+            }
+
+            document.getElementById('add-task-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('task-input');
+                const assigneeSelect = document.getElementById('assignee-select');
+                const taskText = input.value.trim();
+                const assignee = assigneeSelect.value;
+
+                if (taskText) {
+                    const newTaskData = { text: taskText, status: 'todo', assignee: assignee };
+                    const addedTask = await addTaskToAPI(newTaskData);
+                    tasks.push(addedTask);
+                    renderTasks();
+                    input.value = '';
+                    
+                    // Stop typing indicator
+                    if (socket && socket.connected) {
+                        socket.emit('typing:stop');
+                    }
+                    
+                    // Glitch effect on add
+                    document.body.style.animation = 'glitch 0.3s';
+                    setTimeout(() => {
+                        document.body.style.animation = '';
+                    }, 300);
+                }
+            });
+            
+            // Typing indicators
+            document.getElementById('task-input').addEventListener('input', (e) => {
+                if (!isTyping && e.target.value.length > 0 && socket && socket.connected) {
+                    isTyping = true;
+                    socket.emit('typing:start');
+                }
+                
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    if (isTyping && socket && socket.connected) {
+                        isTyping = false;
+                        socket.emit('typing:stop');
+                    }
+                }, 1000);
+            });
+            
+            document.getElementById('task-input').addEventListener('blur', () => {
+                if (isTyping && socket && socket.connected) {
+                    isTyping = false;
+                    socket.emit('typing:stop');
+                }
+            });
+
+            async function deleteTask(taskId) {
+                const success = await deleteTaskFromAPI(taskId);
+                if (success) {
+                    tasks = tasks.filter(t => t.id !== taskId);
+                    renderTasks();
+                }
+            }
+            
+            let draggedItemId = null;
+
+            function handleDragStart(e) {
+                draggedItemId = e.target.dataset.id;
+                e.target.style.opacity = '0.5';
+                e.dataTransfer.effectAllowed = 'move';
+                
+                // Notify others that we're dragging
+                if (socket && socket.connected) {
+                    socket.emit('task:drag:start', { taskId: draggedItemId });
+                }
+            }
+
+            function handleDragEnd(e) {
+                e.target.style.opacity = '1';
+                
+                // Notify others we stopped dragging
+                if (socket && socket.connected) {
+                    socket.emit('task:drag:end', { taskId: draggedItemId });
+                }
+                
+                draggedItemId = null;
+            }
+
+            const columns = document.querySelectorAll('.kanban-column');
+            columns.forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    column.classList.add('drag-over');
+                });
+                column.addEventListener('dragleave', (e) => {
+                    column.classList.remove('drag-over');
+                });
+                column.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    column.classList.remove('drag-over');
+
+                    if (!draggedItemId) return;
+
+                    const newStatus = column.id;
+                    const success = await updateTaskInAPI(draggedItemId, newStatus);
+                    
+                    if(success) {
+                       const task = tasks.find(t => t.id === draggedItemId);
+                       if (task) {
+                           task.status = newStatus;
+                           renderTasks();
+                           if (newStatus === 'done') {
+                               triggerGlitchConfetti();
+                           }
+                       }
+                    }
+                });
+            });
+            
+            // Cyber confetti with glitch effects
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const confettiCtx = confettiCanvas.getContext('2d');
+            let confettiParticles = [];
+
+            function triggerGlitchConfetti() {
+                confettiCanvas.width = window.innerWidth;
+                confettiCanvas.height = window.innerHeight;
+                confettiParticles = [];
+                
+                // Create digital particles
+                for (let i = 0; i < 100; i++) {
+                    confettiParticles.push(createDigitalParticle());
+                }
+                
+                // Screen flash effect
+                document.body.style.animation = 'flicker 0.5s';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 500);
+                
+                animateDigitalConfetti();
+            }
+
+            function createDigitalParticle() {
+                const x = Math.random() * confettiCanvas.width;
+                const y = Math.random() * confettiCanvas.height - confettiCanvas.height;
+                const size = Math.random() * 15 + 5;
+                const speed = Math.random() * 5 + 2;
+                const angle = Math.random() * 360;
+                const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ffff00'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const type = Math.random() > 0.5 ? 'square' : 'line';
+                return { x, y, size, speed, angle, color, type };
+            }
+
+            function animateDigitalConfetti() {
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                
+                confettiParticles.forEach((p, index) => {
+                    p.y += p.speed;
+                    p.x += Math.sin(p.angle) * 2;
+                    p.angle += 0.1;
+
+                    confettiCtx.fillStyle = p.color;
+                    confettiCtx.strokeStyle = p.color;
+                    confettiCtx.lineWidth = 2;
+                    
+                    confettiCtx.save();
+                    confettiCtx.translate(p.x, p.y);
+                    confettiCtx.rotate(p.angle);
+                    
+                    if (p.type === 'square') {
+                        confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    } else {
+                        confettiCtx.beginPath();
+                        confettiCtx.moveTo(-p.size/2, 0);
+                        confettiCtx.lineTo(p.size/2, 0);
+                        confettiCtx.stroke();
+                    }
+                    
+                    confettiCtx.restore();
+
+                    if (p.y > confettiCanvas.height) {
+                        confettiParticles.splice(index, 1);
+                    }
+                });
+
+                if (confettiParticles.length > 0) {
+                    requestAnimationFrame(animateDigitalConfetti);
+                } else {
+                    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                }
+            }
+
+            window.addEventListener('resize', () => {
+                confettiCanvas.width = window.innerWidth;
+                confettiCanvas.height = window.innerHeight;
+            });
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
