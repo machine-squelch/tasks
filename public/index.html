@@ -45,106 +45,269 @@
             100% { transform: translateY(10px); }
         }
 
-        /* Logo glitch effects */
-        .logo-container {
+        /* CRT Monitor Effect for Logo */
+        .crt-monitor {
             position: relative;
-            display: inline-block;
-            animation: logo-float 4s ease-in-out infinite;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 20px solid;
+            border-color: #3a3a3a #2a2a2a #1a1a1a #2a2a2a;
+            border-radius: 20px;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 255, 0, 0.2),
+                0 0 40px rgba(0, 0, 0, 0.8),
+                0 10px 30px rgba(0, 0, 0, 0.9),
+                inset 0 2px 3px rgba(255, 255, 255, 0.1);
             overflow: hidden;
-            padding: 10px;
+            transform: perspective(500px) rotateX(5deg);
+            animation: crt-wobble 10s ease-in-out infinite;
         }
 
-        .logo-container::before {
-            content: '';
-            position: absolute;
-            top: -100%;
-            left: 0;
+        @keyframes crt-wobble {
+            0%, 100% { transform: perspective(500px) rotateX(5deg); }
+            25% { transform: perspective(500px) rotateX(4deg) rotateY(1deg); }
+            50% { transform: perspective(500px) rotateX(5deg) rotateY(-1deg); }
+            75% { transform: perspective(500px) rotateX(6deg) rotateY(0.5deg); }
+        }
+
+        .crt-screen {
+            position: relative;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
+            background: radial-gradient(ellipse at center, 
+                rgba(0, 40, 0, 1) 0%, 
+                rgba(0, 20, 0, 1) 50%, 
+                rgba(0, 10, 0, 1) 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: crt-flicker 0.15s infinite;
+        }
+
+        /* CRT curved screen effect */
+        .crt-screen::before {
+            content: "";
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: radial-gradient(
+                ellipse at center,
                 transparent 0%,
-                rgba(0, 255, 0, 0.1) 45%,
-                rgba(0, 255, 0, 0.3) 50%,
-                rgba(0, 255, 0, 0.1) 55%,
-                transparent 100%
+                transparent 50%,
+                rgba(0, 0, 0, 0.4) 100%
             );
-            animation: scan-line 4s linear infinite;
             pointer-events: none;
+            z-index: 3;
         }
 
-        @keyframes scan-line {
-            0% { top: -100%; }
-            100% { top: 100%; }
-        }
-
-        @keyframes matrix-rain {
-            0% { transform: translateY(-100%); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(100%); opacity: 0; }
-        }
-
-        @keyframes logo-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .logo-glitch {
-            width: 120px;
-            height: 120px;
-            filter: 
-                hue-rotate(120deg) 
-                saturate(1.5) 
-                brightness(1.2)
-                drop-shadow(0 0 20px rgba(0, 255, 0, 0.5));
-            animation: logo-glitch-effect 3s infinite;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-glitch:hover {
-            transform: scale(1.1);
-            filter: 
-                hue-rotate(180deg) 
-                saturate(2.5) 
-                brightness(1.5)
-                drop-shadow(0 0 40px rgba(0, 255, 255, 0.9))
-                contrast(1.2);
-            animation: logo-glitch-burst 0.3s infinite;
-        }
-
-        @keyframes logo-glitch-burst {
-            0% { transform: scale(1.1) rotate(0deg); }
-            25% { transform: scale(1.15) rotate(-2deg) translateX(-2px); }
-            50% { transform: scale(1.1) rotate(2deg) translateY(-2px); }
-            75% { transform: scale(1.12) rotate(-1deg) translateX(2px); }
-            100% { transform: scale(1.1) rotate(0deg); }
-        }
-
-        .logo-glitch::before,
-        .logo-glitch::after {
-            content: '';
+        /* Phosphor glow and scan lines */
+        .crt-screen::after {
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('dllogoonly.png') no-repeat center;
-            background-size: contain;
-            opacity: 0.8;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 3px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(0, 0, 0, 0.05) 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 2;
+            animation: crt-scanlines 8s linear infinite;
         }
 
-        .logo-glitch::before {
-            animation: logo-glitch-1 0.5s infinite;
-            filter: hue-rotate(90deg) saturate(2);
-            z-index: -1;
+        /* Degaussing rainbow effect */
+        @keyframes crt-degauss {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            10% { filter: hue-rotate(90deg) saturate(3) brightness(1.5); transform: scale(1.02); }
+            20% { filter: hue-rotate(180deg) saturate(2) brightness(1.3); transform: scale(0.98); }
+            30% { filter: hue-rotate(270deg) saturate(3) brightness(1.5); transform: scale(1.01); }
+            40% { filter: hue-rotate(360deg) saturate(1) brightness(1); transform: scale(1); }
+            50% { filter: brightness(0.5) contrast(2); }
+            100% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
         }
 
-        .logo-glitch::after {
-            animation: logo-glitch-2 0.5s infinite;
-            filter: hue-rotate(180deg) saturate(2);
-            z-index: -2;
+        /* Click to degauss */
+        .crt-monitor:active .crt-screen {
+            animation: crt-degauss 1s ease-out;
+        }
+
+        @keyframes crt-scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        @keyframes crt-flicker {
+            0%, 100% { 
+                opacity: 1;
+                filter: brightness(1) contrast(1);
+            }
+            92% { 
+                opacity: 0.95;
+                filter: brightness(0.95) contrast(1.02);
+            }
+            94% { 
+                opacity: 1;
+                filter: brightness(1.05) contrast(0.98);
+            }
+        }
+
+        /* Logo inside CRT */
+        .crt-logo {
+            width: 100px;
+            height: 100px;
+            filter: 
+                hue-rotate(120deg) 
+                saturate(1.5) 
+                brightness(1.5)
+                drop-shadow(0 0 10px rgba(0, 255, 0, 0.8))
+                contrast(1.2);
+            animation: crt-logo-pulse 3s infinite, crt-distortion 0.5s infinite;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .crt-logo:hover {
+            filter: 
+                hue-rotate(180deg) 
+                saturate(2.5) 
+                brightness(2)
+                drop-shadow(0 0 20px rgba(0, 255, 255, 1))
+                contrast(1.5);
+        }
+
+        @keyframes crt-logo-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                filter: hue-rotate(120deg) saturate(1.5) brightness(1.5) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+            }
+            50% { 
+                transform: scale(1.05);
+                filter: hue-rotate(140deg) saturate(2) brightness(1.8) drop-shadow(0 0 20px rgba(0, 255, 255, 1));
+            }
+        }
+
+        @keyframes crt-distortion {
+            0%, 100% { transform: skew(0deg); }
+            94% { transform: skew(0deg); }
+            95% { transform: skew(0.5deg); }
+            96% { transform: skew(-0.5deg); }
+        }
+
+        /* CRT Monitor Frame Details */
+        .crt-monitor::before {
+            content: "DL-CRT v2.1 | PHOSPHOR-X | 60Hz";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #444;
+            font-family: 'Share Tech Mono', monospace;
+            z-index: 10;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* Power LED and control buttons */
+        .crt-monitor::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #00ff00 30%, transparent 70%);
+            border-radius: 50%;
+            animation: power-led 2s infinite;
+            box-shadow: 
+                -20px 0 0 -2px #333,
+                20px 0 0 -2px #333,
+                -40px 0 0 -2px #333,
+                40px 0 0 -2px #333;
+        }
+
+        @keyframes power-led {
+            0%, 100% { 
+                background: radial-gradient(circle, #00ff00 30%, transparent 70%);
+                box-shadow: 0 0 5px #00ff00;
+            }
+            50% { 
+                background: radial-gradient(circle, #00ff88 30%, transparent 70%);
+                box-shadow: 0 0 10px #00ff88;
+            }
+        }
+
+        /* Static noise overlay for CRT */
+        .crt-static {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.05;
+            mix-blend-mode: screen;
+            animation: static-shift 0.5s steps(5) infinite;
+        }
+
+        @keyframes static-shift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-1px, 1px); }
+            50% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, -1px); }
+        }
+
+        /* Phosphor burn-in effect */
+        .crt-burn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(
+                circle at center,
+                rgba(0, 255, 0, 0.05) 0%,
+                transparent 70%
+            );
+            pointer-events: none;
+            z-index: 0;
+            animation: burn-fade 20s infinite;
+        }
+
+        @keyframes burn-fade {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Remove old logo styles */
+        .logo-container {
+            position: relative;
+            display: block;
+            margin-bottom: 20px;
         }
 
         @keyframes logo-glitch-effect {
@@ -179,52 +342,6 @@
             77.5% { 
                 filter: hue-rotate(80deg) saturate(2.2) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 0, 0.7));
                 transform: scaleX(1) scaleY(1);
-            }
-        }
-
-        @keyframes logo-glitch-1 {
-            0%, 100% { 
-                clip: rect(0, 150px, 40px, 0); 
-                transform: translateX(0);
-            }
-            20% { 
-                clip: rect(40px, 150px, 80px, 0); 
-                transform: translateX(-2px);
-            }
-            40% { 
-                clip: rect(80px, 150px, 120px, 0); 
-                transform: translateX(2px);
-            }
-            60% { 
-                clip: rect(20px, 150px, 60px, 0); 
-                transform: translateX(-1px);
-            }
-            80% { 
-                clip: rect(60px, 150px, 100px, 0); 
-                transform: translateX(1px);
-            }
-        }
-
-        @keyframes logo-glitch-2 {
-            0%, 100% { 
-                clip: rect(0, 150px, 60px, 0); 
-                transform: translateX(0) scaleX(-1);
-            }
-            20% { 
-                clip: rect(60px, 150px, 120px, 0); 
-                transform: translateX(2px) scaleX(-1);
-            }
-            40% { 
-                clip: rect(30px, 150px, 90px, 0); 
-                transform: translateX(-2px) scaleX(-1);
-            }
-            60% { 
-                clip: rect(90px, 150px, 120px, 0); 
-                transform: translateX(1px) scaleX(-1);
-            }
-            80% { 
-                clip: rect(0, 150px, 30px, 0); 
-                transform: translateX(-1px) scaleX(-1);
             }
         }
 
@@ -667,22 +784,28 @@
     
     <div class="container mx-auto p-4 md:p-8 relative z-10">
         <header class="text-center mb-12">
-            <div class="logo-container mb-6">
-                <img src="dllogoonly.png" alt="DL" class="logo-glitch mx-auto" onclick="triggerMegaGlitch()">
-                <div class="absolute inset-0 pointer-events-none opacity-30">
-                    <div class="text-green-400 text-xs font-mono" style="animation: matrix-rain 2s linear infinite;">
-                        01001100 01010101 01011000 01000101
+            <!-- CRT Monitor with Logo -->
+            <div class="logo-container">
+                <div class="crt-monitor" title="Click monitor to degauss">
+                    <div class="crt-screen">
+                        <div class="crt-burn"></div>
+                        <div class="crt-static"></div>
+                        <img src="dllogoonly.png" alt="DL" class="crt-logo" onclick="triggerMegaGlitch()" title="Click for SYSTEM BREACH">
+                        <!-- Glass reflection -->
+                        <div style="position: absolute; top: 10%; left: 10%; width: 30%; height: 30%; background: radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none; z-index: 5;"></div>
                     </div>
                 </div>
             </div>
-            <div class="inline-block mb-8">
+            
+            <!-- Title Section -->
+            <div class="inline-block">
                 <h1 class="glitch text-5xl md:text-7xl text-green-400 mb-2" data-text="DIGITAL_WAR_ROOM">DIGITAL_WAR_ROOM</h1>
                 <div class="text-cyan-400 text-sm tracking-widest flicker">
                     [REAL_TIME_SYNC_ENABLED]
                 </div>
             </div>
             
-            <p class="text-green-400 text-lg corrupted">SALES_TEAM /// SYNCHRONIZED_OPERATIONS_CENTER</p>
+            <p class="text-green-400 text-lg corrupted mt-4">SALES_TEAM /// SYNCHRONIZED_OPERATIONS_CENTER</p>
             <div id="auth-info" class="mt-4 text-sm">
                 <p class="text-cyan-400">TEAM: <strong class="text-yellow-400 glitch" data-text="DLW_AGENTS">DLW_AGENTS</strong></p>
                 <p class="text-gray-500 text-xs mt-2">
@@ -785,6 +908,13 @@
         function triggerMegaGlitch() {
             document.body.style.animation = 'mega-glitch 0.5s';
             
+            // CRT degauss effect
+            const crtScreen = document.querySelector('.crt-screen');
+            crtScreen.style.animation = 'crt-degauss 1s ease-out';
+            setTimeout(() => {
+                crtScreen.style.animation = 'crt-flicker 0.15s infinite';
+            }, 1000);
+            
             // Add temporary glitch class to everything
             const elements = document.querySelectorAll('*');
             elements.forEach(el => {
@@ -809,6 +939,7 @@
             
             // Console effect
             console.log('%c[SYSTEM_BREACH] MEGA_GLITCH_ACTIVATED', 'color: #00ff00; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #00ff00;');
+            console.log('%c[CRT_DEGAUSS] MAGNETIC_FIELD_RESET', 'color: #00ffff; font-size: 16px;');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
