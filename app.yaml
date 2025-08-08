@@ -8,7 +8,7 @@ services:
   - name: api
     environment_slug: node-js
     github:
-      repo: YOUR_GITHUB_USERNAME/dluxe-task-tracker  # Update with your repo
+      repo: machine-squelch/tasks  # Update with your repo
       branch: main
       deploy_on_push: true
     
