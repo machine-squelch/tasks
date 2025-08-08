@@ -696,32 +696,24 @@ window.addEventListener('DOMContentLoaded', () => {
         return div;
     }
 
-    document.getElementById('add-task-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('task-input');
-        const assigneeSelect = document.getElementById('assignee-select');
-        const taskText = input.value.trim();
-        const assignee = assigneeSelect.value;
+   // NEW SUBMIT LISTENER
+document.getElementById('add-task-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('task-input');
+    const assigneeSelect = document.getElementById('assignee-select');
+    const taskText = input.value.trim();
+    const assignee = assigneeSelect.value;
 
-        if (taskText) {
-            const newTaskData = { text: taskText, status: 'todo', assignee: assignee };
-            const addedTask = await addTaskToAPI(newTaskData);
-            tasks.push(addedTask);
-            renderTasks();
-            input.value = '';
-            
-            // Stop typing indicator
-            if (socket && socket.connected) {
-                socket.emit('typing:stop');
-            }
-            
-            // Glitch effect on add
-            document.body.style.animation = 'glitch 0.3s';
-            setTimeout(() => {
-                document.body.style.animation = '';
-            }, 300);
-        }
-    });
+    if (taskText && socket && socket.connected) {
+        const taskData = { text: taskText, assignee: assignee };
+        // Just send the data to the server; the UI update will come from the 'task:created' event
+        socket.emit('task:create', taskData);
+        input.value = ''; // Clear the input field
+        socket.emit('typing:stop'); // Stop the typing indicator
+    } else if (!socket.connected) {
+        addActivity("ERROR: Connection lost. Cannot create task.");
+    }
+});
     
     // Typing indicators
     document.getElementById('task-input').addEventListener('input', (e) => {
