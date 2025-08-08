@@ -1100,6 +1100,128 @@
          * To implement backend: Replace the fetch/add/update/delete functions
          * with actual API calls to your chosen backend.
          */
+
+        // Particle Animation System with Glitch Effects - MORE VISIBLE
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const particleCount = 100;  // INCREASED from 50
+            let glitchTimer = 0;
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 1;  // FASTER movement
+                    this.vy = (Math.random() - 0.5) * 1;  // FASTER movement
+                    this.size = Math.random() * 4 + 2;  // BIGGER particles
+                    this.opacity = Math.random() * 0.7 + 0.3;  // MORE OPAQUE
+                    this.color = Math.random() > 0.5 ? '#00ff00' : '#00ffff';
+                    this.glitchTimer = Math.random() * 100;
+                    this.isGlitched = false;
+                }
+                
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    // Wrap around screen
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                    
+                    // Random individual glitch
+                    this.glitchTimer--;
+                    if (this.glitchTimer <= 0) {
+                        this.x += (Math.random() - 0.5) * 50;  // BIGGER glitch jump
+                        this.y += (Math.random() - 0.5) * 50;
+                        this.glitchTimer = Math.random() * 200 + 100;
+                        this.isGlitched = true;
+                        this.color = Math.random() > 0.3 ? '#ff00ff' : '#ffff00';
+                        setTimeout(() => {
+                            this.isGlitched = false;
+                            this.color = Math.random() > 0.5 ? '#00ff00' : '#00ffff';
+                        }, 200);  // Longer glitch visibility
+                    }
+                }
+                
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.opacity;
+                    
+                    if (this.isGlitched) {
+                        // Draw glitched particle with RGB split - MORE VISIBLE
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(this.x - 4, this.y, this.size, this.size);
+                        ctx.fillStyle = '#00ff00';
+                        ctx.fillRect(this.x, this.y, this.size, this.size);
+                        ctx.fillStyle = '#0000ff';
+                        ctx.fillRect(this.x + 4, this.y, this.size, this.size);
+                    } else {
+                        // Add glow effect
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect(this.x, this.y, this.size, this.size);
+                    }
+                    
+                    // Draw connection lines to nearby particles - MORE VISIBLE
+                    particles.forEach(other => {
+                        const dx = other.x - this.x;
+                        const dy = other.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 150 && distance > 0) {  // INCREASED range
+                            ctx.strokeStyle = this.color;
+                            ctx.globalAlpha = this.opacity * (1 - distance / 150) * 0.5;  // MORE OPAQUE lines
+                            ctx.lineWidth = 1;  // THICKER lines
+                            ctx.beginPath();
+                            ctx.moveTo(this.x, this.y);
+                            ctx.lineTo(other.x, other.y);
+                            ctx.stroke();
+                        }
+                    });
+                    ctx.restore();
+                }
+            }
+            
+            // Create particles
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Global glitch effect - MORE FREQUENT
+                glitchTimer++;
+                if (glitchTimer > 300) {  // More frequent than 500
+                    glitchTimer = 0;
+                    // Cause all particles to glitch
+                    particles.forEach(particle => {
+                        particle.x += (Math.random() - 0.5) * 100;  // BIGGER glitch
+                        particle.y += (Math.random() - 0.5) * 100;
+                    });
+                }
+                
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
             
             // Handle resize
             window.addEventListener('resize', () => {
