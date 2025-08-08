@@ -19,7 +19,7 @@
             position: relative;
         }
 
-        /* Animated background with noise */
+        /* Animated background with enhanced glitchy scan lines */
         body::before {
             content: "";
             position: fixed;
@@ -34,15 +34,105 @@
                     transparent 1px,
                     transparent 2px,
                     rgba(0, 255, 0, 0.03) 3px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(0, 255, 0, 0.01) 50px,
+                    transparent 100px
                 );
             pointer-events: none;
             z-index: 1;
-            animation: scanlines 8s linear infinite;
+            animation: scanlines 8s linear infinite, glitch-shift 0.3s infinite;
+        }
+
+        @keyframes glitch-shift {
+            0%, 98%, 100% { transform: translateX(0); }
+            99% { transform: translateX(2px); }
+        }
+
+        /* Glitchy background scan lines with RGB aberration */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(
+                    180deg,
+                    transparent 0%,
+                    rgba(0, 255, 0, 0.02) 50%,
+                    transparent 100%
+                );
+            pointer-events: none;
+            z-index: 1;
+            animation: scan-wave 4s ease-in-out infinite;
+        }
+
+        /* Random RGB glitch line */
+        @keyframes rgb-glitch-line {
+            0%, 95%, 100% { 
+                opacity: 0;
+                transform: translateY(0);
+            }
+            96% {
+                opacity: 1;
+                transform: translateY(100vh);
+            }
+            97% {
+                opacity: 1;
+                transform: translateY(200vh);
+            }
+            98% {
+                opacity: 1;
+                transform: translateY(50vh);
+            }
+            99% {
+                opacity: 0;
+                transform: translateY(150vh);
+            }
+        }
+
+        .static-overlay::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                #ff0000 0%, 
+                #00ff00 33%, 
+                #0000ff 66%, 
+                #ff0000 100%);
+            opacity: 0;
+            animation: rgb-glitch-line 5s infinite;
+            filter: blur(1px);
+            z-index: 10000;
+        }
+
+        @keyframes scan-wave {
+            0%, 100% { transform: translateY(-100%); }
+            50% { transform: translateY(100%); }
         }
 
         @keyframes scanlines {
             0% { transform: translateY(0); }
             100% { transform: translateY(10px); }
+        }
+
+        /* Particle canvas for background animation */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
         }
 
         /* CRT Monitor Effect for Logo */
@@ -170,7 +260,7 @@
             }
         }
 
-        /* Logo inside CRT */
+        /* Logo inside CRT with restored glitch effects */
         .crt-logo {
             width: 100px;
             height: 100px;
@@ -180,10 +270,35 @@
                 brightness(1.5)
                 drop-shadow(0 0 10px rgba(0, 255, 0, 0.8))
                 contrast(1.2);
-            animation: crt-logo-pulse 3s infinite, crt-distortion 0.5s infinite;
+            animation: crt-logo-pulse 3s infinite, logo-glitch-effect 3s infinite;
             position: relative;
             z-index: 1;
             cursor: pointer;
+        }
+
+        .crt-logo::before,
+        .crt-logo::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('dllogoonly.png') no-repeat center;
+            background-size: 100px 100px;
+            opacity: 0.8;
+        }
+
+        .crt-logo::before {
+            animation: logo-glitch-1 0.5s infinite;
+            filter: hue-rotate(90deg) saturate(2);
+            z-index: -1;
+        }
+
+        .crt-logo::after {
+            animation: logo-glitch-2 0.5s infinite;
+            filter: hue-rotate(180deg) saturate(2);
+            z-index: -2;
         }
 
         .crt-logo:hover {
@@ -193,16 +308,30 @@
                 brightness(2)
                 drop-shadow(0 0 20px rgba(0, 255, 255, 1))
                 contrast(1.5);
+            animation: logo-glitch-burst 0.3s infinite;
+        }
+
+        @keyframes logo-glitch-burst {
+            0% { transform: scale(1.1) rotate(0deg); }
+            25% { transform: scale(1.15) rotate(-2deg) translateX(-2px); }
+            50% { transform: scale(1.1) rotate(2deg) translateY(-2px); }
+            75% { transform: scale(1.12) rotate(-1deg) translateX(2px); }
+            100% { transform: scale(1.1) rotate(0deg); }
+        }
+
+        @keyframes crt-distortion {
+            0%, 100% { transform: skew(0deg); }
+            94% { transform: skew(0deg); }
+            95% { transform: skew(0.5deg); }
+            96% { transform: skew(-0.5deg); }
         }
 
         @keyframes crt-logo-pulse {
             0%, 100% { 
                 transform: scale(1);
-                filter: hue-rotate(120deg) saturate(1.5) brightness(1.5) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
             }
             50% { 
                 transform: scale(1.05);
-                filter: hue-rotate(140deg) saturate(2) brightness(1.8) drop-shadow(0 0 20px rgba(0, 255, 255, 1));
             }
         }
 
@@ -586,7 +715,7 @@
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
         }
 
-        /* Static noise overlay */
+        /* Static noise overlay with enhanced glitch */
         .static-overlay {
             position: fixed;
             top: 0;
@@ -597,6 +726,20 @@
             opacity: 0.03;
             z-index: 1000;
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            animation: static-animation 0.2s infinite;
+        }
+
+        @keyframes static-animation {
+            0%, 100% { opacity: 0.03; }
+            10% { opacity: 0.04; }
+            20% { opacity: 0.02; }
+            30% { opacity: 0.03; }
+            40% { opacity: 0.05; }
+            50% { opacity: 0.03; }
+            60% { opacity: 0.02; }
+            70% { opacity: 0.04; }
+            80% { opacity: 0.03; }
+            90% { opacity: 0.02; }
         }
 
         /* Flicker animation */
@@ -630,14 +773,50 @@
             transform: scale(1.1);
         }
 
-        #confetti-canvas {
+        /* Copyright footer with glitch */
+        .copyright {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            font-size: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 100;
+            animation: copyright-pulse 4s ease-in-out infinite;
+            text-shadow: 
+                0 0 2px rgba(0, 255, 0, 0.5),
+                0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        @keyframes copyright-pulse {
+            0%, 100% { 
+                opacity: 0.6; 
+                color: #00ff00;
+                text-shadow: 0 0 2px rgba(0, 255, 0, 0.5);
+            }
+            50% { 
+                opacity: 0.8; 
+                color: #00ffff;
+                text-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+            }
+            95% {
+                opacity: 0.6;
+                color: #00ff00;
+            }
+            96% {
+                opacity: 1;
+                color: #ff00ff;
+                text-shadow: 0 0 10px rgba(255, 0, 255, 1);
+                transform: translateX(-50%) skewX(10deg);
+            }
+            97% {
+                opacity: 0.6;
+                transform: translateX(-50%) skewX(0deg);
+            }
         }
 
         /* Activity Feed Styles */
@@ -758,6 +937,7 @@
     </style>
 </head>
 <body>
+    <canvas id="particle-canvas"></canvas>
     <div class="static-overlay"></div>
     
     <!-- Connection Status -->
@@ -860,6 +1040,11 @@
     </div>
 
     <canvas id="confetti-canvas"></canvas>
+    
+    <!-- Copyright Notice -->
+    <div class="copyright">
+        © 2025 Adam Gurley - All Rights Reserved
+    </div>
 
     <script>
         /*
@@ -893,6 +1078,132 @@
          * To implement backend: Replace the fetch/add/update/delete functions
          * with actual API calls to your chosen backend.
          */
+
+        // Particle Animation System with Glitch Effects
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const particleCount = 50;
+            let glitchTimer = 0;
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2 + 1;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.color = Math.random() > 0.5 ? '#00ff00' : '#00ffff';
+                    this.glitchTimer = Math.random() * 100;
+                    this.isGlitched = false;
+                }
+                
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    // Wrap around screen
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                    
+                    // Random individual glitch
+                    this.glitchTimer--;
+                    if (this.glitchTimer <= 0) {
+                        this.x += (Math.random() - 0.5) * 20;
+                        this.y += (Math.random() - 0.5) * 20;
+                        this.glitchTimer = Math.random() * 200 + 100;
+                        this.isGlitched = true;
+                        this.color = Math.random() > 0.3 ? '#ff00ff' : '#ffff00';
+                        setTimeout(() => {
+                            this.isGlitched = false;
+                            this.color = Math.random() > 0.5 ? '#00ff00' : '#00ffff';
+                        }, 100);
+                    }
+                }
+                
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.opacity;
+                    
+                    if (this.isGlitched) {
+                        // Draw glitched particle with RGB split
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(this.x - 2, this.y, this.size, this.size);
+                        ctx.fillStyle = '#00ff00';
+                        ctx.fillRect(this.x, this.y, this.size, this.size);
+                        ctx.fillStyle = '#0000ff';
+                        ctx.fillRect(this.x + 2, this.y, this.size, this.size);
+                    } else {
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect(this.x, this.y, this.size, this.size);
+                    }
+                    
+                    // Draw connection lines to nearby particles
+                    particles.forEach(other => {
+                        const dx = other.x - this.x;
+                        const dy = other.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 100 && distance > 0) {
+                            ctx.strokeStyle = this.color;
+                            ctx.globalAlpha = this.opacity * (1 - distance / 100) * 0.3;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(this.x, this.y);
+                            ctx.lineTo(other.x, other.y);
+                            ctx.stroke();
+                        }
+                    });
+                    ctx.restore();
+                }
+            }
+            
+            // Create particles
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Global glitch effect
+                glitchTimer++;
+                if (glitchTimer > 500) {
+                    glitchTimer = 0;
+                    // Cause all particles to glitch
+                    particles.forEach(particle => {
+                        particle.x += (Math.random() - 0.5) * 50;
+                        particle.y += (Math.random() - 0.5) * 50;
+                    });
+                }
+                
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
 
         // Clock display
         function updateTime() {
@@ -943,6 +1254,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Initialize particle background
+            initParticles();
+            
             let tasks = [];
             let db;
             let socket;
