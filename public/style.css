@@ -778,3 +778,31 @@ body::after {
     color: #ff0000;
     animation: flicker 0.5s infinite;
 }
+
+/* --- MOBILE RESPONSIVE STYLES --- */
+@media (max-width: 767px) {
+    .kanban-column {
+        min-height: 300px; /* Shorter columns on mobile */
+    }
+
+    .crt-monitor {
+        width: 150px;
+        height: 150px;
+        border-width: 15px;
+        animation-name: none; /* Disable wobble on mobile for performance */
+    }
+
+    .crt-logo,
+    .crt-logo::before,
+    .crt-logo::after {
+        width: 75px;
+        height: 75px;
+        background-size: 75px 75px;
+    }
+    
+    .typing-indicator {
+        bottom: 20px;
+        left: 20px;
+        transform: none;
+    }
+}
