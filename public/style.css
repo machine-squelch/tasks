@@ -2,11 +2,16 @@
     box-sizing: border-box;
 }
 
+/* --- NEW: Core Mobile Centering & Layout Fixes --- */
+html, body {
+    width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
 body {
     font-family: 'Share Tech Mono', monospace;
     background: #0a0a0a;
-    overflow-x: hidden;
-    position: relative;
 }
 
 /* Animated background with enhanced glitchy scan lines */
@@ -781,6 +786,11 @@ body::after {
 
 /* --- MOBILE RESPONSIVE STYLES --- */
 @media (max-width: 767px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     .kanban-column {
         min-height: 300px; /* Shorter columns on mobile */
     }
