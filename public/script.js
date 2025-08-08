@@ -24,34 +24,6 @@
  * with actual API calls to your chosen backend.
  */
 
-// Particle Animation System with Glitch Effects - MORE VISIBLE
-function initParticles() {
-    const canvas = document.getElementById('particle-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    const particleCount = 100;  // INCREASED from 50
-    let glitchTimer = 0;
-    
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    class Particle {
-        constructor() {
-            this.reset();
-        }
-        
-        reset() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.vx = (Math.random() - 0.5) * 1;  // FASTER movement
-            this.vy = (Math.random() - 0.5) * 1;  // FASTER movement
-            this.size = Math.random() * 4 + 2;  // BIGGER particles
-            this.opacity = Math.random() * 0.7 + 0.3;  // MORE OPAQUE
-            this.color = Math.random() > 0.5 ? '#00ff00' : '#00ffff';
-            this.glitchTimer = Math.random() * 100;
-            this.isGlitched = false;
-        }
-        
         update() {
             this.x += this.vx;
             this.y += this.vy;
@@ -201,23 +173,6 @@ function triggerMegaGlitch() {
     console.log('%c[CRT_DEGAUSS] MAGNETIC_FIELD_RESET', 'color: #00ffff; font-size: 16px;');
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    // Initialize particle background
-    console.log('[PARTICLES] Initializing background animation...');
-    initParticles();
-    console.log('[PARTICLES] Background animation started!');
-    
-    let tasks = [];
-    let db;
-    let socket;
-    let currentUser = '';
-    let isTyping = false;
-    let typingTimeout;
-    
-    // Ask for user name
-    const names = ['Adam', 'Nick', 'Omar'];
-    currentUser = prompt('AGENT_IDENTIFICATION_REQUIRED:', 'Adam') || names[Math.floor(Math.random() * names.length)];
-    
     // Initialize Socket.IO connection
     function initializeSocket() {
         const socketUrl = window.location.hostname === 'localhost' 
@@ -248,14 +203,20 @@ window.addEventListener('DOMContentLoaded', () => {
         });
         
         // Task events
-        socket.on('task:created', (data) => {
-            if (data.user !== currentUser) {
-                tasks.push(data.task);
-                renderTasks();
-                addActivity(`${data.user} created: "${data.task.text}"`);
-            }
-        });
-        
+        // Replace this function in public/script.js
+socket.on('task:created', (data) => {
+    // Add the server-authoritative task to our local array
+    tasks.push(data.task);
+    renderTasks();
+
+    // Log activity conditionally (with typo fixed)
+    if (data.user === currentUser) {
+        addActivity(`You created: "${data.task.text}"`);
+    } else {
+        addActivity(`${data.user} created: "${data.task.text}"`);
+    }
+});
+
         socket.on('task:moved', (data) => {
             if (data.movedBy !== currentUser) {
                 const task = tasks.find(t => t.id === data.taskId);

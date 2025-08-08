@@ -50,59 +50,54 @@ io.on('connection', (socket) => {
     console.log(`[SOCKET] ${data.name} joined the war room`);
   });
   
-  // Task created
-  socket.on('task:create', async (data) => {
-    const user = connectedUsers.get(socket.id);
-    
-    // Create in database
-    const task = {
-      id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      text: data.text,
-      status: 'todo',
-      assignee: data.assignee,
-      createdBy: user?.name || 'Unknown'
-    };
-    
-    db.run(
-      "INSERT INTO tasks (id, text, status, assignee) VALUES (?, ?, ?, ?)",
-      [task.id, task.text, task.status, task.assignee],
-      (err) => {
-        if (!err) {
-          // Broadcast to all clients
-          io.emit('task:created', {
-            task,
-            user: user?.name,
-            timestamp: new Date()
-          });
-          
-          // Activity log
-          io.emit('activity', {
-            type: 'task_created',
-            user: user?.name,
-            task: task.text,
-            timestamp: new Date()
-          });
-        }
+ // Replace this entire function in server.js
+socket.on('task:create', (data) => {
+  const user = connectedUsers.get(socket.id);
+
+  // --- VALIDATION: Ensure incoming data is valid before processing ---
+  if (!data || typeof data.text !== 'string' || data.text.trim() === '' || typeof data.assignee !== 'string') {
+    console.error('[SOCKET_ERROR] Invalid task creation data received:', data);
+    // You can optionally emit an error back to the specific user here
+    // socket.emit('operation_failed', { message: 'Invalid task data.' });
+    return;
+  }
+
+  const task = {
+    id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    text: data.text.trim(),
+    status: 'todo',
+    assignee: data.assignee,
+    createdBy: user?.name || 'Unknown'
+  };
+
+  db.run(
+    "INSERT INTO tasks (id, text, status, assignee) VALUES (?, ?, ?, ?)",
+    [task.id, task.text, task.status, task.assignee],
+    (err) => {
+      if (err) {
+        // --- ERROR LOGGING: Log the specific database error ---
+        console.error('[DB_ERROR] Failed to insert new task:', err.message);
+        return;
       }
-    );
-  });
-  
-  // Task moved
-  socket.on('task:move', async (data) => {
-    const user = connectedUsers.get(socket.id);
-    
-    db.run(
-      "UPDATE tasks SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-      [data.status, data.taskId],
-      (err) => {
-        if (!err) {
-          // Broadcast to all clients
-          io.emit('task:moved', {
-            taskId: data.taskId,
-            newStatus: data.status,
-            movedBy: user?.name,
-            timestamp: new Date()
-          });
+      
+      console.log(`[DB_SUCCESS] Task created by ${user?.name || 'unknown'}. Broadcasting...`);
+
+      // On success, broadcast the new task to ALL clients
+      io.emit('task:created', {
+        task: task,
+        user: user?.name,
+        timestamp: new Date()
+      });
+      
+      // Also broadcast a generic activity update
+      io.emit('activity', {
+        type: 'task_created',
+        message: `⚡ ${user.name || 'Agent'} created task: "${task.text}"`,
+        timestamp: new Date()
+      });
+    }
+  );
+});
           
           // Activity log
           io.emit('activity', {
