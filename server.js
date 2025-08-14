@@ -180,17 +180,6 @@ app.get('/*.css', (req, res, next) => {
     next();
   }
 });
-  const files = fs.readdirSync(publicPath).filter(file => 
-    file.endsWith('.js') || file.endsWith('.css')
-  );
-  
-  res.json({
-    publicPath,
-    staticFiles: files,
-    nodeEnv: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString()
-  });
-});
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
