@@ -1,0 +1,70 @@
+# app.yaml - DigitalOcean App Platform specification
+# Place this in your repository root
+
+name: dluxe-task-tracker
+region: sfo3  # Change to your preferred region (nyc, sfo3, ams, sgp, lon, fra, tor, blr)
+
+services:
+  - name: api
+    environment_slug: node-js
+    github:
+      repo: machine-squelch/tasks  # Update with your actual repo
+      branch: main
+      deploy_on_push: true
+    
+    # Build configuration
+    source_dir: /
+    build_command: npm install
+    run_command: npm start
+    
+    # Resource sizing (optimized for sales team usage)
+    instance_size_slug: basic-xs  # $12/month - better performance for real-time features
+    instance_count: 1
+    
+    # HTTP configuration
+    http_port: 8080
+    
+    # Environment variables
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /workspace/data/tasks.db
+      - key: APP_URL
+        value: ${APP_URL}
+      - key: PORT
+        value: "8080"
+    
+    # Health check (optimized for websockets)
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 15
+      period_seconds: 15
+      timeout_seconds: 8
+      success_threshold: 1
+      failure_threshold: 2
+
+    # Routes
+    routes:
+      - path: /api
+      - path: /socket.io
+
+# Optional: Add a managed database instead of SQLite
+# databases:
+#   - name: db
+#     engine: PG  # PostgreSQL
+#     version: "15"
+#     size: db-s-dev-database  # $7/month dev database
+#     num_nodes: 1
+
+# Static site configuration (if you want to serve frontend separately)
+static_sites:
+  - name: frontend
+    environment_slug: html
+    github:
+      repo: machine-squelch/tasks
+      branch: main
+      deploy_on_push: true
+    source_dir: public
+    routes:
+      - path: /

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testCreate()">Test Create Task</button>
+    <button onclick="testGet()">Test Get Tasks</button>
+    <button onclick="testDelete()">Test Delete Task</button>
+    <div id="results"></div>
+
+    <script>
+        const serverUrl = 'http://localhost:3001';
+        let lastTaskId = null;
+
+        async function testCreate() {
+            try {
+                const response = await fetch(`${serverUrl}/api/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: 'Test Task',
+                        assignee: 'Adam',
+                        task_type: 'general',
+                        priority: 'medium',
+                        deal_value: 0
+                    })
+                });
+                
+                const result = await response.json();
+                lastTaskId = result.id;
+                document.getElementById('results').innerHTML = `<p>Create: ${JSON.stringify(result)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Create Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testGet() {
+            try {
+                const response = await fetch(`${serverUrl}/api/tasks`);
+                const result = await response.json();
+                document.getElementById('results').innerHTML = `<p>Get: ${JSON.stringify(result)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Get Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testDelete() {
+            if (!lastTaskId) {
+                document.getElementById('results').innerHTML = `<p>No task to delete - create one first</p>`;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/tasks/${lastTaskId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                document.getElementById('results').innerHTML = `<p>Delete: ${JSON.stringify(result)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Delete Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

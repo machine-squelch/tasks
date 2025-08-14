@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(npm start)",
+      "Bash(npm install)",
+      "Bash(taskkill:*)",
+      "Bash(set PORT=3000)",
+      "WebFetch(domain:dluxe-task-tracker-8p7dk.ondigitalocean.app)",
+      "WebFetch(domain:protonfield.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
