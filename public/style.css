@@ -838,7 +838,7 @@ select:focus, select:active {
     outline: none !important;
 }
 
-option:hover, option:selected {
+option:hover, option[selected] {
     background-color: #00ff00 !important;
     color: #000000 !important;
 }

@@ -23,7 +23,14 @@ class SocketManager {
                 timeout: 10000,
                 forceNew: true,
                 upgrade: false, // Disable websocket upgrades
-                rememberUpgrade: false
+                rememberUpgrade: false,
+                path: '/socket.io/',  // Explicit path
+                autoConnect: true,
+                // Optimized for DigitalOcean App Platform
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionAttempts: 5,
+                maxReconnectionAttempts: 5
             });
 
             this.setupEventHandlers();

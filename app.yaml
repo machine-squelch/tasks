@@ -24,6 +24,18 @@ services:
     # HTTP configuration
     http_port: 8080
     
+    # Static file handling optimizations
+    cors:
+      allow_origins:
+        - exact: https://protonfield.com
+      allow_methods:
+        - GET
+        - POST
+        - OPTIONS
+      allow_headers:
+        - Content-Type
+        - Authorization
+    
     # Environment variables
     envs:
       - key: NODE_ENV

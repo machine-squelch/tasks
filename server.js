@@ -12,23 +12,30 @@ const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-// FIXED: Digital Ocean Apps compatible Socket.IO config
+// OPTIMIZED: Digital Ocean Apps compatible Socket.IO config
 const io = socketIO(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: false
+    origin: process.env.NODE_ENV === 'production' 
+      ? ["https://protonfield.com", "https://*.protonfield.com"]
+      : "*",
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: false,
+    allowedHeaders: ["Content-Type", "Authorization"]
   },
   transports: ['polling'], // Force polling only for Digital Ocean Apps
   allowEIO3: true,
-  pingTimeout: 30000,
-  pingInterval: 10000,
-  upgradeTimeout: 30000,
+  pingTimeout: 20000,   // Reduced for better detection
+  pingInterval: 5000,   // More frequent pings
+  upgradeTimeout: 10000, // Shorter timeout
   maxHttpBufferSize: 1e6,
-  // Disable connection state recovery for hosting compatibility
+  // Production optimizations
   cookie: false,
   serveClient: false,
-  allowUpgrades: false // Disable websocket upgrades for hosting compatibility
+  allowUpgrades: false, // Disable websocket upgrades for hosting compatibility
+  // Add path for explicit Socket.IO endpoint
+  path: '/socket.io/',
+  // Connection state recovery disabled for production stability
+  connectionStateRecovery: false
 });  
 const PORT = process.env.PORT || 8080;
 
@@ -49,10 +56,27 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '10mb' }));
-// Serve static files from public directory
+
+// Enhanced static file serving with proper MIME types
 app.use(express.static('public', {
-  maxAge: '1d',
-  etag: false
+  maxAge: process.env.NODE_ENV === 'production' ? '1d' : '0',
+  etag: false,
+  setHeaders: (res, path, stat) => {
+    // Set proper MIME types for JavaScript files
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+    if (path.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    }
+    // Security headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+  }
 }));
 
 // Authentication Routes
@@ -107,6 +131,64 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     connections: connectedUsers.size
+  });
+});
+
+// Debug endpoint for troubleshooting static files
+app.get('/debug/static', (req, res) => {
+  const fs = require('fs');
+  const publicDir = path.join(__dirname, 'public');
+  
+  try {
+    const files = fs.readdirSync(publicDir);
+    const jsFiles = files.filter(f => f.endsWith('.js'));
+    
+    res.json({
+      publicDir: publicDir,
+      allFiles: files,
+      jsFiles: jsFiles,
+      serverTime: new Date().toISOString(),
+      nodeEnv: process.env.NODE_ENV
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Explicit JavaScript file serving with correct MIME type
+app.get('/*.js', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public', req.path);
+  
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.sendFile(filePath);
+  } else {
+    next();
+  }
+});
+
+// Explicit CSS file serving with correct MIME type
+app.get('/*.css', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public', req.path);
+  
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'text/css; charset=UTF-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.sendFile(filePath);
+  } else {
+    next();
+  }
+});
+  const files = fs.readdirSync(publicPath).filter(file => 
+    file.endsWith('.js') || file.endsWith('.css')
+  );
+  
+  res.json({
+    publicPath,
+    staticFiles: files,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -586,12 +668,41 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Catch all other routes and serve index.html
+// Handle specific static file extensions that might bypass static middleware
+app.get('*.js', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public', req.path);
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(filePath);
+  } else {
+    next();
+  }
+});
+
+app.get('*.css', (req, res, next) => {
+  const filePath = path.join(__dirname, 'public', req.path);
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(filePath);
+  } else {
+    next();
+  }
+});
+
+// Catch all other routes and serve index.html (but only for non-static files)
 app.get('*', (req, res) => {
   // Skip API routes
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
+  
+  // Skip requests for static files with extensions
+  const fileExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.eot'];
+  if (fileExtensions.some(ext => req.path.toLowerCase().endsWith(ext))) {
+    return res.status(404).json({ error: 'Static file not found' });
+  }
+  
+  // For all other routes (likely SPA routes), serve index.html
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
