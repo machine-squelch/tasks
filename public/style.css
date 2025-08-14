@@ -552,6 +552,17 @@ body::after {
     50% { transform: scale(1.02); }
 }
 
+@keyframes pulse-orange {
+    0%, 100% { 
+        border-color: #ff6b35 !important;
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.8) !important;
+    }
+    50% { 
+        border-color: #ff8c42 !important;
+        box-shadow: 0 0 30px rgba(255, 140, 66, 1) !important;
+    }
+}
+
 /* Input styles */
 .cyber-input {
     background: rgba(0, 0, 0, 0.8) !important;
