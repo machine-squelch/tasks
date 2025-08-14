@@ -1,5 +1,12 @@
 // Fixed server.js for production hosting
 require('dotenv').config();
+
+// Ensure NODE_ENV is set for DigitalOcean
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'production';
+  console.log('[SERVER] NODE_ENV was not set, defaulting to production');
+}
+
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();

@@ -39,15 +39,19 @@ services:
     # Environment variables
     envs:
       - key: NODE_ENV
-        value: production
+        value: "production"
       - key: DATABASE_PATH
-        value: /workspace/data/tasks.db
+        value: "/workspace/data/tasks.db"
       - key: APP_URL
         value: ${APP_URL}
       - key: PORT
         value: "8080"
       - key: JWT_SECRET
         value: "23aceadf1c6d0a93b4a6aa9f7988468ff717808678a58529f8c472a094959bb8aca20ef62d7f7342c49cf2c7e5033fbe9026b5e49bae55ba4467924d69ead4a5"
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: JWT_EXPIRES_IN
+        value: "24h"
     
     # Health check (optimized for websockets)
     health_check:
