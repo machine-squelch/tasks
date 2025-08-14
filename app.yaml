@@ -48,8 +48,7 @@ services:
 
     # Routes
     routes:
-      - path: /api
-      - path: /socket.io
+      - path: /
 
 # Optional: Add a managed database instead of SQLite
 # databases:
@@ -59,14 +58,4 @@ services:
 #     size: db-s-dev-database  # $7/month dev database
 #     num_nodes: 1
 
-# Static site configuration (if you want to serve frontend separately)
-static_sites:
-  - name: frontend
-    environment_slug: html
-    github:
-      repo: machine-squelch/tasks
-      branch: main
-      deploy_on_push: true
-    source_dir: public
-    routes:
-      - path: /
+# Static site configuration removed - now served by Express

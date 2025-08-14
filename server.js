@@ -49,11 +49,11 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '10mb' }));
-// Static files now served by DigitalOcean static site service
-// app.use(express.static('public', {
-//   maxAge: '1d',
-//   etag: false
-// }));
+// Serve static files from public directory
+app.use(express.static('public', {
+  maxAge: '1d',
+  etag: false
+}));
 
 // Authentication Routes
 app.post('/api/auth/login', authLimiter, async (req, res) => {
@@ -581,8 +581,19 @@ app.delete('/api/tasks/:id', (req, res) => {
   });
 });
 
-// Frontend now served by DigitalOcean static site service
-// API-only routes remain active
+// Serve frontend
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Catch all other routes and serve index.html
+app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Start server with enhanced error handling
 server.listen(PORT, '0.0.0.0', () => {
