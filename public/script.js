@@ -8,6 +8,8 @@ window.addEventListener('DOMContentLoaded', () => {
     window.tasks = tasks;
     window.currentUser = currentUser;
     window.renderTasks = renderTasks;
+    window.createTaskElement = createTaskElement;
+    window.deleteTask = deleteTask;
 
     const names = ['Adam', 'Nick', 'Omar'];
     currentUser = prompt('AGENT_IDENTIFICATION_REQUIRED:', 'Adam') || names[Math.floor(Math.random() * names.length)];

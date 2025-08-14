@@ -278,7 +278,7 @@ class TaskSearchManager {
 
         // Group tasks by status and render
         filteredTasks.forEach(task => {
-            if (window.renderTasks && window.createTaskElement) {
+            if (window.createTaskElement) {
                 const taskElement = window.createTaskElement(task);
                 const container = containers[task.status];
                 if (container && taskElement) {
