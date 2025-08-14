@@ -533,11 +533,8 @@ body::after {
 #inprogress { border-color: #00ffff !important; }
 #negotiation { 
     border-color: #ff6b35 !important; 
-    border-width: 3px !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.8) !important;
-    outline: 3px solid #ff6b35 !important;
-    outline-offset: 2px !important;
-    animation: pulse-orange 2s infinite !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 15px rgba(255, 107, 53, 0.5) !important;
 }
 #done { border-color: #ff00ff !important; }
 
